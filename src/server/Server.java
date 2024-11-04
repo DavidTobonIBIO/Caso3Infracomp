@@ -95,7 +95,8 @@ public class Server {
                 PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                while (ServerProtocol.execute(reader, writer));
+                while (ServerProtocol.execute(reader, writer))
+                    ;
 
                 writer.close();
                 reader.close();

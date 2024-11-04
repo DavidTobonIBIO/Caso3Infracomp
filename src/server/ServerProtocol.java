@@ -12,7 +12,7 @@ public class ServerProtocol {
 
         inputLine = reader.readLine();
         System.out.println("Entrada: " + inputLine);
-        
+
         if (inputLine.equals("publickey")) {
             sendPublicKey(writer);
             return true;

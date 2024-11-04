@@ -1,7 +1,7 @@
 package pkg;
 
 public class Package {
-    
+
     private String clientId;
     private String packageId;
     private PackageStatus status;
@@ -32,4 +32,3 @@ public class Package {
         return status.getDisplayName();
     }
 }
-
