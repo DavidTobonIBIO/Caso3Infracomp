@@ -1,6 +1,7 @@
-package _package;
+package pkg;
 
 public class Package {
+    
     private String clientId;
     private String packageId;
     private PackageStatus status;

@@ -1,4 +1,4 @@
-package _package;
+package pkg;
 
 public enum PackageStatus {
     ENOFICINA(0, "ENOFICINA"),

@@ -64,4 +64,8 @@ public class Client extends Thread {
             }
         }
     }
+
+    public int getClientId() {
+        return id;
+    }
 }
