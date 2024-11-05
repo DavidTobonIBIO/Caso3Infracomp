@@ -195,9 +195,18 @@ public class ClientProtocol {
     private void executePackgeRequest(PrintWriter writer) {
         String encryptedClientId = symmetricCipher(client.getClientId());
         String hmacClientId = generateHMAC(client.getClientId());
+        String encryptedPackageId = symmetricCipher(client.getPackageId());
+        String hmacPackageId = generateHMAC(client.getPackageId());
         
         System.out.println("C(K_AB1, uid): " + encryptedClientId);
         System.out.println("HMAC(K_AB2, uid): " + hmacClientId);
+        System.out.println("C(K_AB1, paquete_id): " + encryptedPackageId);
+        System.out.println("HMAC(K_AB2, paquete_id): " + hmacPackageId);
+        
+        writer.println(encryptedClientId);
+        writer.println(hmacClientId);
+        writer.println(encryptedPackageId);
+        writer.println(hmacPackageId);
 
     }
 

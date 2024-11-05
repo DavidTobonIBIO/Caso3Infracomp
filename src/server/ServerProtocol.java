@@ -44,6 +44,7 @@ public class ServerProtocol {
                     System.out.println("Cliente ha verificado la firma");
                     getMasterKey(writer, reader);
                     // TODO: HMAC
+                    getPackageRequest(reader, writer);
                     inputLine = reader.readLine();
                     if (inputLine.equals("TERMINAR")) {
                         System.out.println("Cliente ha solicitado desconexion.");
@@ -118,5 +119,18 @@ public class ServerProtocol {
         byte[] rta = Asymmetric.decipher(privateKey, "RSA", retoByte);
         String encodedK_AB1 = Base64.getEncoder().encodeToString(rta);
         System.out.println(encodedK_AB1);
+    }
+
+    public static void getPackageRequest(BufferedReader reader, PrintWriter writer) throws IOException {
+        String encryptedClientId = reader.readLine();
+        String hmacClientId = reader.readLine();
+        String encryptedPackageId = reader.readLine();
+        String hmacPackageId = reader.readLine();
+
+        System.out.println("C(K_AB1, uid): " + encryptedClientId);
+        System.out.println("HMAC(K_AB2, uid): " + hmacClientId);
+        System.out.println("C(K_AB1, paquete_id): " + encryptedPackageId);
+        System.out.println("HMAC(K_AB2, paquete_id): " + hmacPackageId);
+        
     }
 }
