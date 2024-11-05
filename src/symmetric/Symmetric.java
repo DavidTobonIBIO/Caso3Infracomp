@@ -111,27 +111,10 @@ public class Symmetric {
         Random rand = new Random();
         BigInteger GB = BigInteger.valueOf(G);
         BigInteger x1 = new BigInteger(1022, rand);
-        //System.out.println("x:" + String.valueOf(x1));
-        /*
-        while (x1.compareTo(P) >= 0 ){
-            System.out.println("xciclo:" + String.valueOf(x1));
-            BigInteger subs = x1.subtract(P);
-            BigInteger r = new BigInteger(subs.bitLength(), rand);
-            x1 = x1.subtract(r);
-            if (x1.signum() == -1){
-                x1 = new BigInteger(1024, rand);
-            }
-        }
-        */
-        //int x = rand.nextInt(80);
-        
-        //System.out.println("Valor de x: " + String.valueOf(x1));
         BigInteger y = GB.modPow(x1, P);
         return y;
 
     }
-    
-
 
     public static SecretKey loadKey(String algorithm) throws Exception {
         String keyContent = new String(Files.readAllBytes(Paths.get(KEY_FILE_PATH)));
