@@ -25,6 +25,7 @@ public class ClientProtocol {
 
     public static void execute(BufferedReader reader, PrintWriter writer) throws IOException {
         startCommunication(writer);
+        diffie(writer, reader);
         disconnect(writer);
     }
 

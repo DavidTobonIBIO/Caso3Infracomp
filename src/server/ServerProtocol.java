@@ -28,7 +28,11 @@ public class ServerProtocol {
             case "symmetrickey":
                 sendSymmetricKey(writer);
                 return true;
-    
+
+            case "diffie":
+                diffieHellman(writer);
+                return true;
+
             case "TERMINAR":
                 writer.println("Desconexión exitosa");
                 System.out.println("Cliente ha solicitado desconexión.");
@@ -58,11 +62,11 @@ public class ServerProtocol {
             System.out.println("Llaves generadas");
             int G = Integer.parseInt(GP[1]);
             BigInteger P = Symmetric.parser(GP[0]);
-            writer.println("G:" + String.valueOf(G));
-            writer.println("P:" + String.valueOf(P));
+            writer.println(String.valueOf(G));
+            writer.println(String.valueOf(P));
             BigInteger Y = Symmetric.generateY(P, G);
-            System.out.println("Y:" + String.valueOf(Y));
-            writer.println("Y:" + String.valueOf(Y));
+            System.out.println(String.valueOf(Y));
+            writer.println(String.valueOf(Y));
             sign(P, Y, G);
 
         } catch (IOException | InterruptedException e) {
