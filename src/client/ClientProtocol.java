@@ -11,9 +11,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Random;
 
-import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 
 import SHA.SHA1RSA;
 import SHA.SHA512;
@@ -25,7 +23,6 @@ public class ClientProtocol {
 
     private static final int NUM_ITERATIONS = 32;
     private PublicKey publicKey;
-    private SecretKey symmetricKey;
     private String P;
     private String G;
     private String Y;
@@ -69,9 +66,10 @@ public class ClientProtocol {
         try {
             if (algorithm.equals("RSA")) {
                 publicKey = Asymmetric.loadPublicKey(algorithm);
-            } else if (algorithm.equals("AES")) {
-                symmetricKey = Symmetric.loadKey(algorithm);
-            }
+            } 
+            // else if (algorithm.equals("AES")) {
+            //     symmetricKey = Symmetric.loadKey(algorithm);
+            // }
         } catch (Exception e) {
             System.out.println("Error al cargar las llaves");
             e.printStackTrace();
@@ -100,6 +98,8 @@ public class ClientProtocol {
                 client.setPackageId(i);
                 executePackgeRequest(writer);
             }
+            writer.println("TERMINAR");
+
         } else {
             System.out.println("Falla en la verificacion de la firma");
             writer.println("ERROR");
@@ -196,8 +196,8 @@ public class ClientProtocol {
         String encryptedClientId = symmetricCipher(client.getClientId());
         String hmacClientId = generateHMAC(client.getClientId());
         
-        writer.println("C(K_AB1, uid): " + encryptedClientId);
-        writer.println("HMAC(K_AB2, uid): " + hmacClientId);
+        System.out.println("C(K_AB1, uid): " + encryptedClientId);
+        System.out.println("HMAC(K_AB2, uid): " + hmacClientId);
 
     }
 

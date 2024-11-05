@@ -15,8 +15,6 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.crypto.SecretKey;
-
 import asymmetric.Asymmetric;
 import symmetric.Symmetric;
 
@@ -28,7 +26,6 @@ public class Server {
     private boolean continueFlag = true;
     private int nThreads;
     private static PrivateKey privateKey;
-    private SecretKey symmetricKey;
 
     public void launchWithConsole()
             throws InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
@@ -93,7 +90,7 @@ public class Server {
         System.out.println("Inicializando Servidor...");
         try {
             privateKey = Asymmetric.loadPrivateKey("RSA");
-            symmetricKey = Symmetric.loadKey("AES");
+            // symmetricKey = Symmetric.loadKey("AES");
         } catch (Exception e) {
             System.out.println("Error al cargar las llaves");
             e.printStackTrace();

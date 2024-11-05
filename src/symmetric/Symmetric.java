@@ -25,7 +25,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class Symmetric {
 
     private static final String KEY_FILE_PATH = "keys/symmetric.key";
-    private final static String PADDING = "AES/ECB/PKCS5Padding";
+    private final static String PADDING = "AES/CBC/PKCS5Padding";
 
     public static void generateKeys(String algorithm) {
         System.out.println("Generando llave simétrica...");
