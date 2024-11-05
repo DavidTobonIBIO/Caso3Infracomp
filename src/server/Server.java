@@ -108,10 +108,9 @@ public class Server {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(PORT);
-            int id = 1;
             System.out.println("Servidor Monothread esperando conexión");
             Socket socket = serverSocket.accept();
-            System.out.println("Cliente " + id + " conectado: " + socket.getInetAddress().getHostAddress());
+            System.out.println("Cliente conectado: " + socket.getInetAddress().getHostAddress());
 
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -121,9 +120,9 @@ public class Server {
             writer.close();
             reader.close();
             socket.close();
-            id++;
             serverSocket.close();
-            System.out.println("Servidor finalizado, atendio a " + (id - 1) + " clientes");
+
+            System.out.println("Servidor finalizado");
         } catch (IOException e) {
             System.out.println("Error al iniciar el servidor");
             e.printStackTrace();
