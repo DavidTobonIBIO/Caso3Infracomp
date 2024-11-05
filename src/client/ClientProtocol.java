@@ -12,6 +12,7 @@ import symmetric.Symmetric;
 
 public class ClientProtocol {
 
+    private static final int NUM_ITERATIONS = 32;
     private static PublicKey publicKey;
     private static SecretKey symmetricKey;
 
@@ -20,16 +21,19 @@ public class ClientProtocol {
         loadKey("AES");
     }
 
-    public static void execute(BufferedReader reader, PrintWriter writer) throws IOException {
-        startCommunication(writer);
-        disconnect(writer);
+    public static void execute(BufferedReader reader, PrintWriter writer, boolean isIterative) throws IOException {
+        if (isIterative) {
+            runIterativeCommunication(reader, writer);
+        } else {
+            runConcurrentCommunication(reader, writer);
+        }
     }
 
     private static void startCommunication(PrintWriter writer) {
         writer.println("SECINIT");
     }
 
-    private static void disconnect(PrintWriter writer) {
+    private static void endCommunication(PrintWriter writer) {
         writer.println("TERMINAR");
     }
 
@@ -46,4 +50,19 @@ public class ClientProtocol {
             System.exit(-1);
         }        
     }
+
+    private static void runIterativeCommunication(BufferedReader reader, PrintWriter writer) throws IOException {
+        startCommunication(writer);
+        for (int i = 0; i < NUM_ITERATIONS; i++) {
+            // TODO: implementar la parte del cliente iterativo que se repite 32 veces
+            System.out.println("Iteración " + i);
+        }
+        endCommunication(writer);
+    }
+
+    private static void runConcurrentCommunication(BufferedReader reader, PrintWriter writer) throws IOException {
+        startCommunication(writer);
+        endCommunication(writer);
+    }
+    
 }

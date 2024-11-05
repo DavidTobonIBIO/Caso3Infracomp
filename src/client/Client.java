@@ -16,7 +16,6 @@ public class Client extends Thread {
 
     public Client(int id) {
         this.id = id;
-        ClientProtocol.loadKeys();
     }
 
     public void launchWithConsole() {
@@ -56,7 +55,7 @@ public class Client extends Thread {
             writer = new PrintWriter(socket.getOutputStream(), true);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             
-            ClientProtocol.execute(reader, writer);
+            ClientProtocol.execute(reader, writer, false);
 
             reader.close();
             writer.close();
@@ -70,7 +69,26 @@ public class Client extends Thread {
     }
 
     public void startIterativeClient() {
-        run();
+        Socket socket = null;
+        PrintWriter writer = null;
+        BufferedReader reader = null;
+
+        try {
+            System.out.println("Conectando al servidor...");
+            socket = new Socket(HOST, PORT);
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            ClientProtocol.execute(reader, writer, true);
+
+            reader.close();
+            writer.close();
+            socket.close();
+        } catch (IOException e) {
+            System.out.println("Error al conectar con el servidor");
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
 
     public int getClientId() {
