@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 
 public class Client extends Thread {
 
@@ -29,7 +32,18 @@ public class Client extends Thread {
             writer = new PrintWriter(socket.getOutputStream(), true);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             
-            ClientProtocol.execute(reader, writer, false);
+            try {
+                ClientProtocol.execute(reader, writer, false);
+            } catch (InvalidKeyException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (SignatureException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
             reader.close();
             writer.close();
@@ -53,7 +67,18 @@ public class Client extends Thread {
             writer = new PrintWriter(socket.getOutputStream(), true);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            ClientProtocol.execute(reader, writer, true);
+            try {
+                ClientProtocol.execute(reader, writer, true);
+            } catch (InvalidKeyException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (SignatureException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
             reader.close();
             writer.close();

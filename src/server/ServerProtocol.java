@@ -34,7 +34,7 @@ public class ServerProtocol {
                 sendSymmetricKey(writer);
                 return true;
 
-            case "diffie":
+            case "OK Reto":
                 diffieHellman(writer);
                 return true;
 

@@ -44,7 +44,7 @@ public class ClientProtocol {
     private static void startCommunication(PrintWriter writer) {
         writer.println("SECINIT");
         //TODO: Agregar pasos 2-6
-        writer.println("OK");
+        writer.println("OK Reto");
     }
 
     private static void endCommunication(PrintWriter writer) {
@@ -70,7 +70,7 @@ public class ClientProtocol {
         byte[] firma = diffie(writer, reader);
         boolean check = checkSignature(firma);
         if (check){
-            writer.println("OK");
+            writer.println("OK Diffie-Hellman");
             createY();
             for (int i = 0; i < NUM_ITERATIONS; i++) {
                 // TODO: implementar la parte del cliente iterativo que se repite 32 veces
@@ -97,7 +97,7 @@ public class ClientProtocol {
     
 
     private static byte[] diffie(PrintWriter writer, BufferedReader reader) throws IOException{
-        writer.println("diffie");
+        //writer.println("diffie");
         G = reader.readLine();
         System.out.println("G: " + G);
         P = reader.readLine();
