@@ -10,10 +10,14 @@ import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.util.Base64;
 
-import SHA1RSA.SHA1RSA;
+import SHA.SHA1RSA;
 import symmetric.Symmetric;
 
 public class ServerProtocol {
+    private static BigInteger Y;
+    private static BigInteger P;
+    private static int G;
+    private static BigInteger x;
 
     private static final String OPEN_SSL_PATH = "OpenSSL-1.1.1h_win32";
 
@@ -30,6 +34,10 @@ public class ServerProtocol {
 
             case "OK Reto":
                 diffieHellman(writer);
+                return true;
+            
+            case "OK Diffie-Hellman":
+                getMasterKey(writer, reader);
                 return true;
 
             case "TERMINAR":
@@ -48,11 +56,13 @@ public class ServerProtocol {
         try {
             String[] GP = Symmetric.generatePG(OPEN_SSL_PATH);
             System.out.println("Llaves simetricas generadas");
-            int G = Integer.parseInt(GP[1]);
-            BigInteger P = Symmetric.parser(GP[0]);
+            G = Integer.parseInt(GP[1]);
+            P = Symmetric.parser(GP[0]);
             writer.println(String.valueOf(G));
             writer.println(String.valueOf(P));
-            BigInteger Y = Symmetric.generateY(P, G);
+            BigInteger[] YX = Symmetric.generateY(P, G);
+            Y = YX[0];
+            x = YX[1];
             //System.out.println(String.valueOf(Y));
             writer.println(String.valueOf(Y));
             sign(P, Y, G, writer);
@@ -81,4 +91,10 @@ public class ServerProtocol {
         writer.println(firmaString);
     }
     
+    public static void getMasterKey(PrintWriter writer, BufferedReader reader) throws IOException{
+        String YClient = reader.readLine();
+        BigInteger YClient_int = new BigInteger(YClient);
+        BigInteger master = YClient_int.modPow(x, P);
+        //System.out.println(String.valueOf(master));  
+    }
 }

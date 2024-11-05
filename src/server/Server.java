@@ -34,8 +34,7 @@ public class Server {
             boolean inMenu = true;
     
             while (inMenu) {
-                System.out.println(
-                        "\nBienvenido al SERVIDOR, seleccione una de las opciones: \n1. Generar pareja de llaves \n2. Ejecutar \n0. Salir");
+                System.out.println("\nBienvenido al SERVIDOR, seleccione una de las opciones: \n1. Generar pareja de llaves \n2. Ejecutar \n0. Salir");
                 int option = scanner.nextInt();
                 switch (option) {
                     case 1:
