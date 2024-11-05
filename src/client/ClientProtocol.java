@@ -16,8 +16,6 @@ import asymmetric.Asymmetric;
 import symmetric.Symmetric;
 import java.math.BigInteger;
 
-import symmetric.Symmetric;
-
 public class ClientProtocol {
 
     private static final int NUM_ITERATIONS = 32;

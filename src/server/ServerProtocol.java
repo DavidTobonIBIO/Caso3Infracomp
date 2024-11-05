@@ -21,6 +21,8 @@ public class ServerProtocol {
     private static BigInteger P;
     private static int G;
     private static BigInteger x;
+
+    private static final String OPEN_SSL_PATH = "OpenSSL-1.1.1h_win32";
     private static PublicKey K_AB1;
     private static PublicKey K_AB2;
 
@@ -33,14 +35,6 @@ public class ServerProtocol {
         switch (inputLine) {
             case "SECINIT":
                 System.out.println("Cliente ha iniciado comunicación segura");
-                return true;
-                
-            case "publickey":
-                sendPublicKey(writer);
-                return true;
-    
-            case "symmetrickey":
-                sendSymmetricKey(writer);
                 return true;
 
             case "OK Reto":
@@ -62,22 +56,11 @@ public class ServerProtocol {
                 return true;
         }
     }
-    
-
-    private static void sendPublicKey(PrintWriter writer) {
-        System.out.println("Enviando llave publica");
-        writer.println("publickey");
-    }
-
-    private static void sendSymmetricKey(PrintWriter writer) {
-        System.out.println("Enviando llave simetrica");
-        writer.println("symmetrickey");
-    }
 
     private static void diffieHellman(PrintWriter writer) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
         try {
-            String[] GP = Symmetric.generatePG("C:\\Users\\laura\\Downloads\\OpenSSL-1.1.1h_win32\\OpenSSL-1.1.1h_win32");
-            System.out.println("Llaves generadas");
+            String[] GP = Symmetric.generatePG(OPEN_SSL_PATH);
+            System.out.println("Llaves simetricas generadas");
             G = Integer.parseInt(GP[1]);
             P = Symmetric.parser(GP[0]);
             writer.println(String.valueOf(G));
