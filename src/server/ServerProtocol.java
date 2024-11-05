@@ -20,10 +20,10 @@ import symmetric.Symmetric;
 
 public class ServerProtocol {
 
-    private static BigInteger Y;
-    private static BigInteger P;
-    private static int G;
-    private static BigInteger x;
+    //private static BigInteger Y;
+    //private static BigInteger P;
+    //private static int G;
+    //private static BigInteger x;
 
     private static final String OPEN_SSL_PATH = "OpenSSL-1.1.1h_win32";
     private static SecretKey K_AB1;
@@ -34,15 +34,33 @@ public class ServerProtocol {
         String inputLine = reader.readLine();
         if (inputLine.equals("SECINIT"))  {
             System.out.println("Cliente ha iniciado comunicacion segura");
-            getReto(reader, writer);
+            String reto = reader.readLine();
+            System.out.println("reto:" + reto);
+            String rta = getReto(reto);
+            System.out.println("reto: " + rta);
+            writer.println(rta);
             inputLine = reader.readLine();
             if (inputLine.equals("OK")) {
                 System.out.println("Cliente ha respondido correctamente al reto");
-                diffieHellman(writer);
+                String[] GPYX = diffieHellman();
+                String G = GPYX[0];
+                String P = GPYX[1];
+                String Y = GPYX[2];
+                String x = GPYX[3];
+                writer.println(G);
+                System.out.println(G);
+                writer.println(P);
+                System.out.println(P);
+                writer.println(Y);
+                System.out.println(Y);
+                String firma = sign(P, Y, G);
+                writer.println(firma);
                 inputLine = reader.readLine();
                 if (inputLine.equals("OK")) {
                     System.out.println("Cliente ha verificado la firma");
-                    getMasterKey(writer, reader);
+                    BigInteger pBig = new BigInteger(P);
+                    BigInteger xBig = new BigInteger(x);
+                    getMasterKey(writer, reader, xBig, pBig);
                     // TODO: HMAC
                     getPackageRequest(reader, writer);
                     inputLine = reader.readLine();
@@ -60,23 +78,25 @@ public class ServerProtocol {
         return false;
     }
 
-    private static void diffieHellman(PrintWriter writer)
+    private static String[] diffieHellman()
             throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         try {
             String[] GP = Symmetric.generatePG(OPEN_SSL_PATH);
             System.out.println("Llaves simetricas generadas");
-            G = Integer.parseInt(GP[1]);
-            P = Symmetric.parser(GP[0]);
-            writer.println(String.valueOf(G));
-            writer.println(String.valueOf(P));
+            int G = Integer.parseInt(GP[1]);
+            BigInteger P = Symmetric.parser(GP[0]);
+            //writer.println(String.valueOf(G));
+            //writer.println(String.valueOf(P));
             BigInteger[] YX = Symmetric.generateY(P, G);
-            Y = YX[0];
-            x = YX[1];
-            writer.println(String.valueOf(Y));
-            sign(P, Y, G, writer);
-
+            BigInteger Y = YX[0];
+            BigInteger x = YX[1];
+            //writer.println(String.valueOf(Y));
+            //sign(P, Y, G, writer);
+            String [] GPYX = new String[] {String.valueOf(G), String.valueOf(P), String.valueOf(Y), String.valueOf(x)};
+            return GPYX;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
@@ -85,20 +105,17 @@ public class ServerProtocol {
         return privateKey;
     }
 
-    private static void sign(BigInteger P, BigInteger Y, int G, PrintWriter writer)
+    private static String sign(String P, String Y, String G)
             throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
-        String pString = String.valueOf(P);
-        String gString = String.valueOf(G);
-        String yString = String.valueOf(Y);
 
-        String message = pString + gString + yString;
+        String message = P + G + Y;
         byte[] firma = SHA1RSA.sign(getPrivateKey(), message);
 
         String firmaString = Base64.getEncoder().encodeToString(firma);
-        writer.println(firmaString);
+        return firmaString;
     }
 
-    public static void getMasterKey(PrintWriter writer, BufferedReader reader)
+    public static void getMasterKey(PrintWriter writer, BufferedReader reader, BigInteger x, BigInteger P)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         String YClient = reader.readLine();
         BigInteger YClient_int = new BigInteger(YClient);
@@ -112,13 +129,13 @@ public class ServerProtocol {
         System.out.println(encodedK_AB2);
     }
 
-    public static void getReto(BufferedReader reader, PrintWriter writer) throws IOException {
-        String reto = reader.readLine();
+    public static String getReto(String reto) {
         byte[] retoByte = Base64.getDecoder().decode(reto);
         PrivateKey privateKey = getPrivateKey();
         byte[] rta = Asymmetric.decipher(privateKey, "RSA", retoByte);
-        String encodedK_AB1 = Base64.getEncoder().encodeToString(rta);
-        System.out.println(encodedK_AB1);
+        String reto_decode = Base64.getEncoder().encodeToString(rta);
+        //System.out.println(encodedK_AB1);
+        return reto_decode;
     }
 
     public static void getPackageRequest(BufferedReader reader, PrintWriter writer) throws IOException {

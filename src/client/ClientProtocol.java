@@ -55,7 +55,6 @@ public class ClientProtocol {
         writer.println("SECINIT");
         generateReto();
         cipherReto(writer);
-        writer.println("OK Reto");
     }
 
     private void endCommunication(PrintWriter writer) {
@@ -83,45 +82,62 @@ public class ClientProtocol {
         generateReto();
         cipherReto(writer);
         // TODO: verificar igualdad de respuesta al reto
-        writer.println("OK");
-        byte[] firma = diffie(writer, reader);
-        boolean check = checkSignature(firma);
-        if (check) {
-            System.out.println("Firma verificada");
+        String rtaReto = reader.readLine();
+        BigInteger rtaRetoDecode = new BigInteger( Base64.getDecoder().decode(rtaReto));
+        System.out.println(String.valueOf(rtaRetoDecode));
+        if (reto.compareTo(rtaRetoDecode) == 0){
             writer.println("OK");
-            createY();
-            writer.println(String.valueOf(YClient));
-            getMasterKey(writer, reader);
-            for (int i = 1; i <= NUM_ITERATIONS; i++) {
-                System.out.println("Iteracion " + i);
-                client.setClientId(i);
-                client.setPackageId(i);
-                executePackgeRequest(writer);
-            }
-            writer.println("TERMINAR");
+            byte[] firma = diffie(writer, reader);
+            boolean check = checkSignature(firma);
+            if (check) {
+                System.out.println("Firma verificada");
+                writer.println("OK");
+                createY();
+                writer.println(String.valueOf(YClient));
+                getMasterKey(writer, reader);
+                for (int i = 1; i <= NUM_ITERATIONS; i++) {
+                    System.out.println("Iteracion " + i);
+                    client.setClientId(i);
+                    client.setPackageId(i);
+                    executePackgeRequest(writer);
+                }
+                writer.println("TERMINAR");
 
-        } else {
-            System.out.println("Falla en la verificacion de la firma");
+            } else {
+                System.out.println("Falla en la verificacion de la firma");
+                writer.println("ERROR");
+            }
+        
+            endCommunication(writer);
+        }else{
+            System.out.println("Falla en la verificacion del reto");
             writer.println("ERROR");
         }
-
-        endCommunication(writer);
     }
 
     private void runConcurrentCommunication(BufferedReader reader, PrintWriter writer) throws IOException,
             InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         startCommunication(writer);
-        byte[] firma = diffie(writer, reader);
-        boolean check = checkSignature(firma);
-        if (check) {
-            writer.println("OK Diffie-Hellman");
-            createY();
-            writer.println(String.valueOf(YClient));
-            getMasterKey(writer, reader);
-        } else {
+        String rtaReto = reader.readLine();
+        BigInteger rtaRetoDecode = new BigInteger( Base64.getDecoder().decode(rtaReto));
+        System.out.println(String.valueOf(rtaRetoDecode));
+        if (reto.compareTo(rtaRetoDecode) == 0){
+            writer.println("OK");
+            byte[] firma = diffie(writer, reader);
+            boolean check = checkSignature(firma);
+            if (check) {
+                writer.println("OK");
+                createY();
+                writer.println(String.valueOf(YClient));
+                getMasterKey(writer, reader);
+            } else {
+                writer.println("ERROR");
+            }
+            endCommunication(writer);
+        }else{
+            System.out.println("Falla en la verificacion del reto");
             writer.println("ERROR");
         }
-        endCommunication(writer);
     }
 
     private byte[] diffie(PrintWriter writer, BufferedReader reader) throws IOException {
@@ -170,9 +186,10 @@ public class ClientProtocol {
 
     public void cipherReto(PrintWriter writer) {
         String retoString = String.valueOf(reto);
+        System.out.println("reto: " + retoString);
         byte[] encryptedReto = Asymmetric.cipher(publicKey, "RSA", retoString);
-        System.out.println("Cifrado: " + String.valueOf(encryptedReto));
         String encryptedRetoString = Base64.getEncoder().encodeToString(encryptedReto);
+        System.out.println("Cifrado: " + String.valueOf(encryptedRetoString));
         writer.println(encryptedRetoString);
     }
 

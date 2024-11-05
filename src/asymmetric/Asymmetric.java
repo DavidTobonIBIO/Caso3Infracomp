@@ -83,7 +83,7 @@ public class Asymmetric {
 
     public static byte[] cipher(Key key, String algorithm, String msg) {
         byte[] encryptedMsg = null;
-        System.out.println("Llave: " + key);
+        //System.out.println("Llave: " + key);
         try {
             Cipher cipher = Cipher.getInstance(algorithm);
             byte[] mensajeBytes = msg.getBytes();
