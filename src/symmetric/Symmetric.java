@@ -107,12 +107,13 @@ public class Symmetric {
         return resp;
     }
 
-    public static BigInteger generateY(BigInteger P, int G){
+    public static BigInteger[] generateY(BigInteger P, int G){
         Random rand = new Random();
         BigInteger GB = BigInteger.valueOf(G);
         BigInteger x1 = new BigInteger(1022, rand);
         BigInteger y = GB.modPow(x1, P);
-        return y;
+        BigInteger[] resp = new BigInteger[] {y, x1};
+        return resp;
 
     }
 

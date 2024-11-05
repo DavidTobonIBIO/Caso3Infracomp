@@ -27,6 +27,7 @@ public class ClientProtocol {
     private static String G;
     private static String Y;
     private static BigInteger YClient;
+    private static BigInteger x;
 
     public static void loadKeys() {
         loadKey("RSA");
@@ -72,6 +73,8 @@ public class ClientProtocol {
         if (check){
             writer.println("OK Diffie-Hellman");
             createY();
+            writer.println(String.valueOf(YClient));
+            getMasterKey(writer, reader);
             for (int i = 0; i < NUM_ITERATIONS; i++) {
                 // TODO: implementar la parte del cliente iterativo que se repite 32 veces
                 System.out.println("Iteración " + i);
@@ -88,7 +91,10 @@ public class ClientProtocol {
         byte[] firma = diffie(writer, reader);
         boolean check = checkSignature(firma);
         if (check){
-            System.out.println("Ejecutar cositas");
+            writer.println("OK Diffie-Hellman");
+            createY();
+            writer.println(String.valueOf(YClient));
+            getMasterKey(writer, reader);
         }else{
             writer.println("ERROR");
         }
@@ -111,11 +117,19 @@ public class ClientProtocol {
     }
 
     private static void createY(){
-        YClient = Symmetric.generateY(new BigInteger(P), Integer.parseInt(G));
+        BigInteger[] YX = Symmetric.generateY(new BigInteger(P), Integer.parseInt(G));
+        YClient = YX[0];
+        x = YX[1];
     }
     private static boolean checkSignature(byte[] signature) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
         String message = P + G + Y;
         boolean check = SHA1RSA.verify( message, publicKey, signature);
         return check;
+    }
+
+    public static void getMasterKey(PrintWriter writer, BufferedReader reader) throws IOException{
+        BigInteger YServer = new BigInteger(Y);
+        BigInteger master = YServer.modPow(x, new BigInteger(P));
+        //System.out.println(String.valueOf(master));
     }
 }
