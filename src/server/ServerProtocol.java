@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 
+import SHA1RSA.SHA1RSA;
 import symmetric.Symmetric;
 
 public class ServerProtocol {
@@ -54,11 +55,26 @@ public class ServerProtocol {
             BigInteger Y = Symmetric.generateY(P, G);
             System.out.println("Y:" + String.valueOf(Y));
             writer.println("Y:" + String.valueOf(Y));
+            sign(P, Y, G);
 
         } catch (IOException | InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    private static void getPrivateKey(){
+
+    }
+
+    private static void sign(BigInteger P, BigInteger Y, int G){
+        String pString = String.valueOf(P);
+        String gString = String.valueOf(G);
+        String yString = String.valueOf(Y);
+
+        String message = pString + gString + yString;
+        //SHA1RSA.sign(null, message);
+
     }
     
 }
