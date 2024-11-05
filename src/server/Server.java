@@ -6,9 +6,12 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.PrivateKey;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.crypto.SecretKey;
 
 import asymmetric.Asymmetric;
 import symmetric.Symmetric;
@@ -20,6 +23,8 @@ public class Server {
 
     private boolean continueFlag = true;
     private int nThreads;
+    private PrivateKey privateKey;
+    private SecretKey symmetricKey;
 
     public void launchWithConsole() {
         Scanner scanner = new Scanner(System.in);
@@ -77,6 +82,14 @@ public class Server {
 
     public void launch() {
         System.out.println("Inicializando Servidor...");
+        try {
+            privateKey = Asymmetric.loadPrivateKey("RSA");
+            symmetricKey = Symmetric.loadKey("AES");
+        } catch (Exception e) {
+            System.out.println("Error al cargar las llaves");
+            e.printStackTrace();
+            System.exit(-1);
+        }
         if (nThreads == 1) {
             startMonothreadServer();
         } else {

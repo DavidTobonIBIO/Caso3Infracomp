@@ -45,7 +45,7 @@ public class ClientProtocol {
                 symmetricKey = Symmetric.loadKey(algorithm);
             }
         } catch (Exception e) {
-            System.out.println("Error al cargar llave publica");
+            System.out.println("Error al cargar las llaves");
             e.printStackTrace();
             System.exit(-1);
         }        
