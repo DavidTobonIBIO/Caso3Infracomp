@@ -1,14 +1,23 @@
 package client;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class Client extends Thread {
 
-    public static final int PORT = 3400;
-    public static final String HOST = "localhost";
+    private static final int PORT = 3400;
+    private static final String HOST = "localhost";
+
+    private int id;
+
+    public Client(int id) {
+        this.id = id;
+        ClientProtocol.loadKeys();
+    }
 
     public void launchWithConsole() {
         Scanner scanner = new Scanner(System.in);
@@ -42,19 +51,24 @@ public class Client extends Thread {
                 System.out.println("Conectando al servidor...");
                 socket = new Socket(HOST, PORT);
                 writer = new PrintWriter(socket.getOutputStream(), true);
-                reader = new BufferedReader(new java.io.InputStreamReader(socket.getInputStream()));
-
+                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                
                 ClientProtocol.execute(reader, writer);
 
                 reader.close();
                 writer.close();
                 socket.close();
                 continueFlag = false;
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.out.println("Error al conectar con el servidor");
                 e.printStackTrace();
-                System.exit(-1);
+                continueFlag = false;
             }
         }
+        System.out.println("Desconectado del servidor");
+    }
+
+    public int getClientId() {
+        return id;
     }
 }

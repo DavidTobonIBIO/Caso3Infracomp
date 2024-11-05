@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ServerThread extends Thread {
-    
+
     private Socket clientSocket = null;
     private int id;
 
@@ -22,7 +22,7 @@ public class ServerThread extends Thread {
             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(clientSocket.getInputStream()));
             ServerProtocol.execute(reader, writer);
-            
+
             writer.close();
             reader.close();
             clientSocket.close();

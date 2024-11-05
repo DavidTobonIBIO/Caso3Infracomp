@@ -3,39 +3,51 @@ package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.PublicKey;
+
+import javax.crypto.SecretKey;
+
+import asymmetric.Asymmetric;
+import symmetric.Symmetric;
 import java.math.BigInteger;
 
 import symmetric.Symmetric;
 
 public class ClientProtocol {
 
+    private static PublicKey publicKey;
+    private static SecretKey symmetricKey;
+
+    public static void loadKeys() {
+        loadKey("RSA");
+        loadKey("AES");
+    }
+
     public static void execute(BufferedReader reader, PrintWriter writer) throws IOException {
-        requestKeys(reader, writer);
-        diffie(writer, reader);
+        startCommunication(writer);
         disconnect(writer);
-        
     }
 
-    private static void requestKeys(BufferedReader reader, PrintWriter writer) throws IOException {
-        System.out.println("Solicitando llaves al servidor");
-        publicKeyRequest(writer, reader);
-        symmetricKeyRequest(writer, reader);
-    }
-
-    private static void publicKeyRequest(PrintWriter writer, BufferedReader reader) throws IOException {
-        writer.println("publickey");
-        String response = reader.readLine();
-        System.out.println("Llave publica: " + response);
-    }
-
-    private static void symmetricKeyRequest(PrintWriter writer, BufferedReader reader) throws IOException {
-        writer.println("symmetrickey");
-        String response = reader.readLine();
-        System.out.println("Llave simetrica: " + response);
+    private static void startCommunication(PrintWriter writer) {
+        writer.println("SECINIT");
     }
 
     private static void disconnect(PrintWriter writer) {
-        writer.println("exit");
+        writer.println("TERMINAR");
+    }
+
+    private static void loadKey(String algorithm) {
+        try {
+            if (algorithm.equals("RSA")) {
+                publicKey = Asymmetric.loadPublicKey(algorithm);
+            } else if (algorithm.equals("AES")) {
+                symmetricKey = Symmetric.loadKey(algorithm);
+            }
+        } catch (Exception e) {
+            System.out.println("Error al cargar llave publica");
+            e.printStackTrace();
+            System.exit(-1);
+        }        
     }
 
     private static void diffie(PrintWriter writer, BufferedReader reader) throws IOException{
@@ -50,5 +62,4 @@ public class ClientProtocol {
         BigInteger YClient = Symmetric.generateY(new BigInteger(P), Integer.parseInt(G));
         writer.println(String.valueOf(YClient));
     }
-
 }

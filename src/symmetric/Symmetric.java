@@ -3,6 +3,8 @@ package symmetric;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.util.Base64;
@@ -12,6 +14,7 @@ import java.util.regex.Pattern;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 public class Symmetric {
 
@@ -129,4 +132,11 @@ public class Symmetric {
     }
     
 
+
+    public static SecretKey loadKey(String algorithm) throws Exception {
+        String keyContent = new String(Files.readAllBytes(Paths.get(KEY_FILE_PATH)));
+        byte[] decodedKey = Base64.getDecoder().decode(keyContent);
+
+        return new SecretKeySpec(decodedKey, algorithm);
+    }
 }
