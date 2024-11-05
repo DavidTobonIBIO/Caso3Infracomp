@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
 public class ServerThread extends Thread {
 
@@ -40,6 +41,9 @@ public class ServerThread extends Thread {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (SignatureException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

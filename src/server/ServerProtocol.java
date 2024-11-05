@@ -7,10 +7,13 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
 import SHA.SHA1RSA;
+import SHA.SHA512;
 import symmetric.Symmetric;
 
 public class ServerProtocol {
@@ -18,8 +21,10 @@ public class ServerProtocol {
     private static BigInteger P;
     private static int G;
     private static BigInteger x;
+    private static PublicKey K_AB1;
+    private static PublicKey K_AB2;
 
-    public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+    public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         String inputLine = reader.readLine();
     
           
@@ -108,10 +113,13 @@ public class ServerProtocol {
         writer.println(firmaString);
     }
     
-    public static void getMasterKey(PrintWriter writer, BufferedReader reader) throws IOException{
+    public static void getMasterKey(PrintWriter writer, BufferedReader reader) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException{
         String YClient = reader.readLine();
         BigInteger YClient_int = new BigInteger(YClient);
         BigInteger master = YClient_int.modPow(x, P);
+        PublicKey[] masterKeys = SHA512.encrypt(String.valueOf(master));
+        K_AB1 = masterKeys[0];
+        K_AB2 = masterKeys[1];
         //System.out.println(String.valueOf(master));  
     }
 }

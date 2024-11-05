@@ -10,6 +10,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +30,7 @@ public class Server {
     private static PrivateKey privateKey;
         private SecretKey symmetricKey;
     
-        public void launchWithConsole() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+        public void launchWithConsole() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
             Scanner scanner = new Scanner(System.in);
             boolean inMenu = true;
     
@@ -86,7 +87,7 @@ public class Server {
             return privateKey;
     }
 
-    public void launch() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+    public void launch() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         System.out.println("Inicializando Servidor...");
         try {
             privateKey = Asymmetric.loadPrivateKey("RSA");
@@ -103,7 +104,7 @@ public class Server {
         }
     }
 
-    private void startMonothreadServer() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+    private void startMonothreadServer() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(PORT);
