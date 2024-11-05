@@ -1,7 +1,6 @@
 import java.util.Scanner;
 
 import client.Client;
-import client.ClientProtocol;
 
 public class ClientApp {
 

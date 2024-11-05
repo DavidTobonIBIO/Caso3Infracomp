@@ -151,10 +151,10 @@ public class Server {
                 ServerThread serverThread = new ServerThread(socket, id);
                 threadPool.execute(serverThread);
                 id++;
-                if (id > MAX_CLIENTS) {
-                    System.out.println("Limite de clientes alcanzado. No se aceptarán más conexiones.");
-                    continueFlag = false;
-                }
+                // if (id > MAX_CLIENTS) {
+                //     System.out.println("Limite de clientes alcanzado. No se aceptarán más conexiones.");
+                //     continueFlag = false;
+                // }
             }
         } catch (IOException e) {
             System.out.println("Error al iniciar el servidor");
