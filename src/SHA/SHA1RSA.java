@@ -10,7 +10,8 @@ import java.security.SignatureException;
 public class SHA1RSA {
     private static final String ALGORITHM = "SHA1WithRSA";
 
-    public static byte[] sign(PrivateKey privateKey, String message) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException{
+    public static byte[] sign(PrivateKey privateKey, String message)
+            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature firma = Signature.getInstance(ALGORITHM);
         firma.initSign(privateKey);
         byte[] datos = message.getBytes();
@@ -19,7 +20,8 @@ public class SHA1RSA {
         return digitalSignature;
     }
 
-    public static boolean verify(String message, PublicKey publicKey, byte[] digitalSignature) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
+    public static boolean verify(String message, PublicKey publicKey, byte[] digitalSignature)
+            throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         Signature firma = Signature.getInstance(ALGORITHM);
         firma.initVerify(publicKey);
         byte[] datos = message.getBytes();

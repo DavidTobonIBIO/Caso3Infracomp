@@ -6,14 +6,15 @@ import client.ClientProtocol;
 public class ClientApp {
 
     private static final int NUM_ITERATIONS = 32;
-    
+
     public static void main(String[] args) throws Exception {
-        
+
         Scanner scanner = new Scanner(System.in);
         boolean inMenu = true;
-    
+
         while (inMenu) {
-            System.out.println("Bienvenido al CLIENTE, seleccione una de las opciones: \n1. Ejecutar cliente iterativo\n2. Ejecutar cliente concurrente\n0. Salir");
+            System.out.println(
+                    "Bienvenido al CLIENTE, seleccione una de las opciones: \n1. Ejecutar cliente iterativo\n2. Ejecutar cliente concurrente\n0. Salir");
             int option = scanner.nextInt();
             if (option == 1) {
                 System.out.println("Inicializando Cliente Iterativo...");

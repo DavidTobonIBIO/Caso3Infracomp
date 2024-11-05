@@ -31,14 +31,15 @@ public class ClientProtocol {
     private BigInteger x;
     private SecretKey K_AB1;
     private SecretKey K_AB2;
-    private BigInteger Reto;
+    private BigInteger reto;
 
-    public  void loadKeys() {
+    public void loadKeys() {
         loadKey("RSA");
         loadKey("AES");
     }
 
-    public  void execute(BufferedReader reader, PrintWriter writer, boolean isIterative) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
+    public void execute(BufferedReader reader, PrintWriter writer, boolean isIterative) throws IOException,
+            InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         if (isIterative) {
             runIterativeCommunication(reader, writer);
         } else {
@@ -46,18 +47,18 @@ public class ClientProtocol {
         }
     }
 
-    private  void startCommunication(PrintWriter writer) {
+    private void startCommunication(PrintWriter writer) {
         writer.println("SECINIT");
-        generateChallenge();
-        cipherChallenge(writer);
+        generateReto();
+        cipherReto(writer);
         writer.println("OK Reto");
     }
 
-    private  void endCommunication(PrintWriter writer) {
+    private void endCommunication(PrintWriter writer) {
         writer.println("TERMINAR");
     }
 
-    private  void loadKey(String algorithm) {
+    private void loadKey(String algorithm) {
         try {
             if (algorithm.equals("RSA")) {
                 publicKey = Asymmetric.loadPublicKey(algorithm);
@@ -68,14 +69,15 @@ public class ClientProtocol {
             System.out.println("Error al cargar las llaves");
             e.printStackTrace();
             System.exit(-1);
-        }        
+        }
     }
 
-    private  void runIterativeCommunication(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
+    private void runIterativeCommunication(BufferedReader reader, PrintWriter writer) throws IOException,
+            InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         startCommunication(writer);
         byte[] firma = diffie(writer, reader);
         boolean check = checkSignature(firma);
-        if (check){
+        if (check) {
             writer.println("OK Diffie-Hellman");
             createY();
             writer.println(String.valueOf(YClient));
@@ -84,31 +86,30 @@ public class ClientProtocol {
                 // TODO: implementar la parte del cliente iterativo que se repite 32 veces
                 System.out.println("Iteración " + i);
             }
-        }else{
+        } else {
             writer.println("ERROR");
         }
-        
+
         endCommunication(writer);
     }
 
-    private  void runConcurrentCommunication(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
+    private void runConcurrentCommunication(BufferedReader reader, PrintWriter writer) throws IOException,
+            InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         startCommunication(writer);
         byte[] firma = diffie(writer, reader);
         boolean check = checkSignature(firma);
-        if (check){
+        if (check) {
             writer.println("OK Diffie-Hellman");
             createY();
             writer.println(String.valueOf(YClient));
             getMasterKey(writer, reader);
-        }else{
+        } else {
             writer.println("ERROR");
         }
         endCommunication(writer);
     }
-    
 
-    private  byte[] diffie(PrintWriter writer, BufferedReader reader) throws IOException{
-        //writer.println("diffie");
+    private byte[] diffie(PrintWriter writer, BufferedReader reader) throws IOException {
         G = reader.readLine();
         System.out.println("G: " + G);
         P = reader.readLine();
@@ -117,22 +118,25 @@ public class ClientProtocol {
         System.out.println("Y: " + Y);
         String firma = reader.readLine();
         byte[] firmaByte = Base64.getDecoder().decode(firma);
-        
+
         return firmaByte;
     }
 
-    private  void createY(){
+    private void createY() {
         BigInteger[] YX = Symmetric.generateY(new BigInteger(P), Integer.parseInt(G));
         YClient = YX[0];
         x = YX[1];
     }
-    private  boolean checkSignature(byte[] signature) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
+
+    private boolean checkSignature(byte[] signature)
+            throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         String message = P + G + Y;
-        boolean check = SHA1RSA.verify( message, publicKey, signature);
+        boolean check = SHA1RSA.verify(message, publicKey, signature);
         return check;
     }
 
-    public  void getMasterKey(PrintWriter writer, BufferedReader reader) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException{
+    public void getMasterKey(PrintWriter writer, BufferedReader reader)
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         BigInteger YServer = new BigInteger(Y);
         BigInteger master = YServer.modPow(x, new BigInteger(P));
         SecretKey[] masterKeys = SHA512.encrypt(String.valueOf(master));
@@ -141,19 +145,19 @@ public class ClientProtocol {
         String encodedK_AB1 = Base64.getEncoder().encodeToString(K_AB1.getEncoded());
         String encodedK_AB2 = Base64.getEncoder().encodeToString(K_AB2.getEncoded());
         System.out.println(encodedK_AB1);
-        System.out.println(encodedK_AB2); 
-        //System.out.println(String.valueOf(master));
+        System.out.println(encodedK_AB2);
     }
 
-    public  void generateChallenge(){
+    public void generateReto() {
         Random rand = new Random();
-        Reto = new BigInteger(1024, rand);
+        reto = new BigInteger(116, rand);
     }
 
-    public  void cipherChallenge(PrintWriter writer){
-        String reto = String.valueOf(Reto);
-        byte[] cifrado = Asymmetric.cipher(K_AB1,"RSA", reto);
-        String encodedK_AB1 = Base64.getEncoder().encodeToString(cifrado);
+    public void cipherReto(PrintWriter writer) {
+        String retoString = String.valueOf(reto);
+        byte[] encryptedReto = Asymmetric.cipher(publicKey, "RSA", retoString);
+        System.out.println("Cifrado: " + String.valueOf(encryptedReto));
+        String encodedK_AB1 = Base64.getEncoder().encodeToString(encryptedReto);
         writer.println(encodedK_AB1);
     }
 }

@@ -20,6 +20,7 @@ import asymmetric.Asymmetric;
 import symmetric.Symmetric;
 
 public class ServerProtocol {
+
     private static BigInteger Y;
     private static BigInteger P;
     private static int G;
@@ -29,12 +30,12 @@ public class ServerProtocol {
     private static SecretKey K_AB1;
     private static SecretKey K_AB2;
 
-    public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
+    public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException,
+            NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         String inputLine = reader.readLine();
-    
-          
+
         System.out.println("Entrada: " + inputLine);
-    
+
         switch (inputLine) {
             case "SECINIT":
                 System.out.println("Cliente ha iniciado comunicación segura");
@@ -44,7 +45,7 @@ public class ServerProtocol {
             case "OK Reto":
                 diffieHellman(writer);
                 return true;
-            
+
             case "OK Diffie-Hellman":
                 getMasterKey(writer, reader);
                 return true;
@@ -53,7 +54,7 @@ public class ServerProtocol {
                 writer.println("Desconexión exitosa");
                 System.out.println("Cliente ha solicitado desconexión.");
                 return false;
-    
+
             default:
                 writer.println("Comando no reconocido");
                 System.out.println("Comando no reconocido: " + inputLine);
@@ -61,7 +62,8 @@ public class ServerProtocol {
         }
     }
 
-    private static void diffieHellman(PrintWriter writer) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
+    private static void diffieHellman(PrintWriter writer)
+            throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         try {
             String[] GP = Symmetric.generatePG(OPEN_SSL_PATH);
             System.out.println("Llaves simetricas generadas");
@@ -72,35 +74,34 @@ public class ServerProtocol {
             BigInteger[] YX = Symmetric.generateY(P, G);
             Y = YX[0];
             x = YX[1];
-            //System.out.println(String.valueOf(Y));
             writer.println(String.valueOf(Y));
             sign(P, Y, G, writer);
 
         } catch (IOException | InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
-    private static PrivateKey getPrivateKey(){
+    private static PrivateKey getPrivateKey() {
         PrivateKey privateKey = Server.getPrivateKey();
         return privateKey;
     }
 
-    private static void sign(BigInteger P, BigInteger Y, int G, PrintWriter writer) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
+    private static void sign(BigInteger P, BigInteger Y, int G, PrintWriter writer)
+            throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         String pString = String.valueOf(P);
         String gString = String.valueOf(G);
         String yString = String.valueOf(Y);
 
         String message = pString + gString + yString;
         byte[] firma = SHA1RSA.sign(getPrivateKey(), message);
-        
+
         String firmaString = Base64.getEncoder().encodeToString(firma);
-        //System.out.println(firmaString);
         writer.println(firmaString);
     }
-    
-    public static void getMasterKey(PrintWriter writer, BufferedReader reader) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException{
+
+    public static void getMasterKey(PrintWriter writer, BufferedReader reader)
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         String YClient = reader.readLine();
         BigInteger YClient_int = new BigInteger(YClient);
         BigInteger master = YClient_int.modPow(x, P);
@@ -110,14 +111,14 @@ public class ServerProtocol {
         String encodedK_AB1 = Base64.getEncoder().encodeToString(K_AB1.getEncoded());
         String encodedK_AB2 = Base64.getEncoder().encodeToString(K_AB2.getEncoded());
         System.out.println(encodedK_AB1);
-        System.out.println(encodedK_AB2);  
+        System.out.println(encodedK_AB2);
     }
 
-    public static void getReto(BufferedReader reader, PrintWriter writer) throws IOException{
+    public static void getReto(BufferedReader reader, PrintWriter writer) throws IOException {
         String reto = reader.readLine();
         byte[] retoByte = Base64.getDecoder().decode(reto);
         PrivateKey privateKey = getPrivateKey();
-        byte[] rta = Asymmetric.decrypt(privateKey, "RSA", retoByte);
+        byte[] rta = Asymmetric.decipher(privateKey, "RSA", retoByte);
         String encodedK_AB1 = Base64.getEncoder().encodeToString(rta);
         System.out.println(encodedK_AB1);
     }

@@ -81,34 +81,31 @@ public class Asymmetric {
         return keyFactory.generatePrivate(keySpec);
     }
 
-
-    public static byte[] cipher(Key llave, String algoritmo, String mensaje){
-        byte[] cifrado;
-
+    public static byte[] cipher(Key key, String algorithm, String msg) {
+        byte[] encryptedMsg = null;
+        System.out.println("Llave: " + key);
         try {
-            Cipher cifrador = Cipher.getInstance(algoritmo);
-            byte[] mensajeBytes = mensaje.getBytes();
-            cifrador.init(Cipher.ENCRYPT_MODE, llave);
-            cifrado = cifrador.doFinal(mensajeBytes);
-            return cifrado;
+            Cipher cipher = Cipher.getInstance(algorithm);
+            byte[] mensajeBytes = msg.getBytes();
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            encryptedMsg = cipher.doFinal(mensajeBytes);
         } catch (Exception e) {
-            // TODO: handle exception
-            return null;
+            e.printStackTrace();
+            System.exit(-1);
         }
+        return encryptedMsg;
     }
-    
 
-    public static byte[] decrypt(Key llave, String algoritmo, byte[] mensaje){
-        byte[] descifrado;
+    public static byte[] decipher(Key key, String algorithm, byte[] msg) {
+        byte[] decryptedMsg = null;
 
         try {
-            Cipher cifrador = Cipher.getInstance(algoritmo);
-            cifrador.init(Cipher.DECRYPT_MODE, llave);
-            descifrado = cifrador.doFinal(mensaje);
+            Cipher cipher = Cipher.getInstance(algorithm);
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            decryptedMsg = cipher.doFinal(msg);
         } catch (Exception e) {
-            // TODO: handle exception
-            return null;
+            e.printStackTrace();
         }
-        return descifrado;
+        return decryptedMsg;
     }
 }
