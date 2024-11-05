@@ -23,13 +23,17 @@ public class ClientProtocol {
     private static final int NUM_ITERATIONS = 32;
     private static PublicKey publicKey;
     private static SecretKey symmetricKey;
+    private static String P;
+    private static String G;
+    private static String Y;
+    private static BigInteger YClient;
 
     public static void loadKeys() {
         loadKey("RSA");
         loadKey("AES");
     }
 
-    public static void execute(BufferedReader reader, PrintWriter writer, boolean isIterative) throws IOException {
+    public static void execute(BufferedReader reader, PrintWriter writer, boolean isIterative) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         if (isIterative) {
             runIterativeCommunication(reader, writer);
         } else {
@@ -39,6 +43,8 @@ public class ClientProtocol {
 
     private static void startCommunication(PrintWriter writer) {
         writer.println("SECINIT");
+        //TODO: Agregar pasos 2-6
+        writer.println("OK");
     }
 
     private static void endCommunication(PrintWriter writer) {
@@ -59,51 +65,56 @@ public class ClientProtocol {
         }        
     }
 
-    private static void runIterativeCommunication(BufferedReader reader, PrintWriter writer) throws IOException {
+    private static void runIterativeCommunication(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         startCommunication(writer);
-        for (int i = 0; i < NUM_ITERATIONS; i++) {
-            // TODO: implementar la parte del cliente iterativo que se repite 32 veces
-            System.out.println("Iteración " + i);
+        byte[] firma = diffie(writer, reader);
+        boolean check = checkSignature(firma);
+        if (check){
+            writer.println("OK");
+            createY();
+            for (int i = 0; i < NUM_ITERATIONS; i++) {
+                // TODO: implementar la parte del cliente iterativo que se repite 32 veces
+                System.out.println("Iteración " + i);
+            }
+        }else{
+            writer.println("ERROR");
         }
+        
         endCommunication(writer);
     }
 
-    private static void runConcurrentCommunication(BufferedReader reader, PrintWriter writer) throws IOException {
+    private static void runConcurrentCommunication(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         startCommunication(writer);
+        byte[] firma = diffie(writer, reader);
+        boolean check = checkSignature(firma);
+        if (check){
+            System.out.println("Ejecutar cositas");
+        }else{
+            writer.println("ERROR");
+        }
         endCommunication(writer);
     }
     
 
-    private static void diffie(PrintWriter writer, BufferedReader reader) throws IOException{
+    private static byte[] diffie(PrintWriter writer, BufferedReader reader) throws IOException{
         writer.println("diffie");
-        String G = reader.readLine();
+        G = reader.readLine();
         System.out.println("G: " + G);
-        String P = reader.readLine();
+        P = reader.readLine();
         System.out.println("P: " + P);
-        String Y = reader.readLine();
+        Y = reader.readLine();
         System.out.println("Y: " + Y);
         String firma = reader.readLine();
         byte[] firmaByte = Base64.getDecoder().decode(firma);
-        String message = P + G + Y;
         
-        try {
-            boolean check = checkSignature(firmaByte, message);
-            System.out.println(check);
-        } catch (InvalidKeyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SignatureException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        BigInteger YClient = Symmetric.generateY(new BigInteger(P), Integer.parseInt(G));
-        //writer.println(String.valueOf(YClient));
+        return firmaByte;
     }
 
-    private static boolean checkSignature(byte[] signature, String message) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
+    private static void createY(){
+        YClient = Symmetric.generateY(new BigInteger(P), Integer.parseInt(G));
+    }
+    private static boolean checkSignature(byte[] signature) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
+        String message = P + G + Y;
         boolean check = SHA1RSA.verify( message, publicKey, signature);
         return check;
     }
