@@ -15,6 +15,8 @@ import symmetric.Symmetric;
 
 public class ServerProtocol {
 
+    private static final String OPEN_SSL_PATH = "OpenSSL-1.1.1h_win32";
+
     public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         String inputLine = reader.readLine();
     
@@ -44,7 +46,7 @@ public class ServerProtocol {
 
     private static void diffieHellman(PrintWriter writer) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
         try {
-            String[] GP = Symmetric.generatePG("OpenSSL-1.1.1h_win32");
+            String[] GP = Symmetric.generatePG(OPEN_SSL_PATH);
             System.out.println("Llaves simetricas generadas");
             int G = Integer.parseInt(GP[1]);
             BigInteger P = Symmetric.parser(GP[0]);
