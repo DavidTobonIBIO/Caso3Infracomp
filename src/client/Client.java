@@ -24,10 +24,14 @@ public class Client extends Thread {
         boolean inMenu = true;
 
         while (inMenu) {
-            System.out.println("Bienvenido al CLIENTE, seleccione una de las opciones: \n1. Ejecutar \n0. Salir");
+            System.out.println("Bienvenido al CLIENTE, seleccione una de las opciones: \n1. Ejecutar cliente iterativo\n2. Ejecutar cliente concurrente\n0. Salir");
             int option = scanner.nextInt();
             if (option == 1) {
-                System.out.println("Inicializando Cliente...");
+                System.out.println("Inicializando Cliente Iterativo...");
+                startIterativeClient();
+                inMenu = false;
+            } else if (option == 2) {
+                System.out.println("Inicializando Clientes Concurrentes...");
                 start();
                 inMenu = false;
             } else if (option == 0) {
@@ -45,27 +49,28 @@ public class Client extends Thread {
         Socket socket = null;
         PrintWriter writer = null;
         BufferedReader reader = null;
-        boolean continueFlag = true;
-        while (continueFlag) {
-            try {
-                System.out.println("Conectando al servidor...");
-                socket = new Socket(HOST, PORT);
-                writer = new PrintWriter(socket.getOutputStream(), true);
-                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                
-                ClientProtocol.execute(reader, writer);
+        
+        try {
+            System.out.println("Conectando al servidor...");
+            socket = new Socket(HOST, PORT);
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            
+            ClientProtocol.execute(reader, writer);
 
-                reader.close();
-                writer.close();
-                socket.close();
-                continueFlag = false;
-            } catch (IOException e) {
-                System.out.println("Error al conectar con el servidor");
-                e.printStackTrace();
-                continueFlag = false;
-            }
+            reader.close();
+            writer.close();
+            socket.close();
+        } catch (IOException e) {
+            System.out.println("Error al conectar con el servidor");
+            e.printStackTrace();
+            System.exit(-1);
         }
         System.out.println("Desconectado del servidor");
+    }
+
+    public void startIterativeClient() {
+        run();
     }
 
     public int getClientId() {
