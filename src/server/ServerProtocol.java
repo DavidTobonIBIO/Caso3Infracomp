@@ -3,6 +3,9 @@ package server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigInteger;
+
+import symmetric.Symmetric;
 
 public class ServerProtocol {
 
@@ -23,6 +26,9 @@ public class ServerProtocol {
             outputLine = "exit";
             writer.println(outputLine);
             return false;
+        } else if(inputLine.equals("diffie")) {
+           diffieHellman(writer);
+           return false;
         }
         return true;
     }
@@ -37,4 +43,22 @@ public class ServerProtocol {
         writer.println("symmetrickey");
     }
 
+    private static void diffieHellman(PrintWriter writer){
+        try {
+            String[] GP = Symmetric.generatePG("C:\\Users\\laura\\Downloads\\OpenSSL-1.1.1h_win32\\OpenSSL-1.1.1h_win32");
+            System.out.println("Llaves generadas");
+            int G = Integer.parseInt(GP[1]);
+            BigInteger P = Symmetric.parser(GP[0]);
+            writer.println("G:" + String.valueOf(G));
+            writer.println("P:" + String.valueOf(P));
+            BigInteger Y = Symmetric.generateY(P, G);
+            System.out.println("Y:" + String.valueOf(Y));
+            writer.println("Y:" + String.valueOf(Y));
+
+        } catch (IOException | InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
 }

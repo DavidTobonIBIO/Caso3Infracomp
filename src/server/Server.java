@@ -33,6 +33,8 @@ public class Server {
                 case 1:
                     System.out.println("Generando llaves...");
                     generateKeys();
+                    
+                    
                     break;
                 case 2:
                     boolean check = true;

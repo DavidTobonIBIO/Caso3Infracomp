@@ -1,8 +1,14 @@
 package symmetric;
 
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.util.Base64;
+import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -41,4 +47,86 @@ public class Symmetric {
             System.exit(-1);
         }
     }
+
+    public static String[] generatePG(String openSSLPath) throws IOException, InterruptedException{
+        Process process = Runtime.getRuntime().exec(openSSLPath + "\\openssl dhparam -text 1024");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        StringBuilder output = new StringBuilder();
+
+	    while ((line = reader.readLine()) != null) {
+	        output.append(line).append("\n");
+	    }
+	    reader.close();
+	    process.waitFor();
+        
+        //System.out.println(output);
+
+        String prime = "prime:\\s*([0-9a-fA-F:]+(\\s*[0-9a-fA-F:]+)*)";
+
+        Pattern p = Pattern.compile(prime);
+        Matcher matcherP = p.matcher(output);
+        String pString = "";
+        String gString = "";
+
+        if (matcherP.find()){
+            pString = matcherP.group(1);
+            pString = pString.replaceAll("\n", "").replaceAll(" ", "");
+        }else{
+            System.out.println("P not found");
+        }
+            
+        String generator = "generator:\\s*(\\d+)";
+        Pattern g = Pattern.compile(generator);
+        Matcher matcherG = g.matcher(output);
+        
+        if (matcherG.find()){
+            gString = matcherG.group(1);
+        }else{
+            System.out.println("G not found");
+        }
+
+        String[] GP = new String[] {pString, gString};
+        return GP;
+    }
+
+    public static BigInteger parser(String P){
+        String[] partes = P.split(":");
+        String newS = "";
+
+        for (int i = 0; i < partes.length; i++){
+            int parse = Integer.parseInt(partes[i], 16);
+            String bin = Integer.toBinaryString(parse);
+            newS = newS + bin;
+        }
+        //System.out.println(newS);
+        BigInteger resp = new BigInteger(newS, 2);
+        return resp;
+    }
+
+    public static BigInteger generateY(BigInteger P, int G){
+        Random rand = new Random();
+        BigInteger GB = BigInteger.valueOf(G);
+        BigInteger x1 = new BigInteger(1022, rand);
+        //System.out.println("x:" + String.valueOf(x1));
+        /*
+        while (x1.compareTo(P) >= 0 ){
+            System.out.println("xciclo:" + String.valueOf(x1));
+            BigInteger subs = x1.subtract(P);
+            BigInteger r = new BigInteger(subs.bitLength(), rand);
+            x1 = x1.subtract(r);
+            if (x1.signum() == -1){
+                x1 = new BigInteger(1024, rand);
+            }
+        }
+        */
+        //int x = rand.nextInt(80);
+        
+        //System.out.println("Valor de x: " + String.valueOf(x1));
+        BigInteger y = GB.modPow(x1, P);
+        return y;
+
+    }
+    
+
 }

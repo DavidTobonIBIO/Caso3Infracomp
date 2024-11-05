@@ -3,12 +3,17 @@ package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigInteger;
+
+import symmetric.Symmetric;
 
 public class ClientProtocol {
 
     public static void execute(BufferedReader reader, PrintWriter writer) throws IOException {
         requestKeys(reader, writer);
+        diffie(writer, reader);
         disconnect(writer);
+        
     }
 
     private static void requestKeys(BufferedReader reader, PrintWriter writer) throws IOException {
@@ -31,6 +36,19 @@ public class ClientProtocol {
 
     private static void disconnect(PrintWriter writer) {
         writer.println("exit");
+    }
+
+    private static void diffie(PrintWriter writer, BufferedReader reader) throws IOException{
+        writer.println("diffie");
+        String G = reader.readLine();
+        System.out.println("G: " + G);
+        String P = reader.readLine();
+        System.out.println("P: " + P);
+        String Y = reader.readLine();
+        System.out.println("Y: " + Y);
+
+        BigInteger YClient = Symmetric.generateY(new BigInteger(P), Integer.parseInt(G));
+        writer.println(String.valueOf(YClient));
     }
 
 }
