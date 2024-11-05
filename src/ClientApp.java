@@ -6,8 +6,9 @@ import client.ClientProtocol;
 public class ClientApp {
 
     private static final int NUM_ITERATIONS = 32;
+    
     public static void main(String[] args) throws Exception {
-        ClientProtocol.loadKeys();
+        
         Scanner scanner = new Scanner(System.in);
         boolean inMenu = true;
     

@@ -16,6 +16,7 @@ import javax.crypto.SecretKey;
 
 import SHA.SHA1RSA;
 import SHA.SHA512;
+import asymmetric.Asymmetric;
 import symmetric.Symmetric;
 
 public class ServerProtocol {
@@ -37,6 +38,7 @@ public class ServerProtocol {
         switch (inputLine) {
             case "SECINIT":
                 System.out.println("Cliente ha iniciado comunicación segura");
+                getReto(reader, writer);
                 return true;
 
             case "OK Reto":
@@ -109,5 +111,14 @@ public class ServerProtocol {
         String encodedK_AB2 = Base64.getEncoder().encodeToString(K_AB2.getEncoded());
         System.out.println(encodedK_AB1);
         System.out.println(encodedK_AB2);  
+    }
+
+    public static void getReto(BufferedReader reader, PrintWriter writer) throws IOException{
+        String reto = reader.readLine();
+        byte[] retoByte = Base64.getDecoder().decode(reto);
+        PrivateKey privateKey = getPrivateKey();
+        byte[] rta = Asymmetric.decrypt(privateKey, "RSA", retoByte);
+        String encodedK_AB1 = Base64.getEncoder().encodeToString(rta);
+        System.out.println(encodedK_AB1);
     }
 }

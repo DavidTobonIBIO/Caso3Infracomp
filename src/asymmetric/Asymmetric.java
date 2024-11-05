@@ -3,6 +3,7 @@ package asymmetric;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -11,6 +12,8 @@ import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+
+import javax.crypto.Cipher;
 
 public class Asymmetric {
 
@@ -76,5 +79,36 @@ public class Asymmetric {
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
         KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
         return keyFactory.generatePrivate(keySpec);
+    }
+
+
+    public static byte[] cipher(Key llave, String algoritmo, String mensaje){
+        byte[] cifrado;
+
+        try {
+            Cipher cifrador = Cipher.getInstance(algoritmo);
+            byte[] mensajeBytes = mensaje.getBytes();
+            cifrador.init(Cipher.ENCRYPT_MODE, llave);
+            cifrado = cifrador.doFinal(mensajeBytes);
+            return cifrado;
+        } catch (Exception e) {
+            // TODO: handle exception
+            return null;
+        }
+    }
+    
+
+    public static byte[] decrypt(Key llave, String algoritmo, byte[] mensaje){
+        byte[] descifrado;
+
+        try {
+            Cipher cifrador = Cipher.getInstance(algoritmo);
+            cifrador.init(Cipher.DECRYPT_MODE, llave);
+            descifrado = cifrador.doFinal(mensaje);
+        } catch (Exception e) {
+            // TODO: handle exception
+            return null;
+        }
+        return descifrado;
     }
 }

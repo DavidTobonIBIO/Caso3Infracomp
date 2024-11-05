@@ -14,6 +14,7 @@ public class Client extends Thread {
 
     private static final int PORT = 3400;
     private static final String HOST = "localhost";
+    private ClientProtocol clientProtocol = new ClientProtocol();
 
     private int id;
 
@@ -34,7 +35,8 @@ public class Client extends Thread {
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             
             try {
-                ClientProtocol.execute(reader, writer, false);
+                clientProtocol.loadKeys();
+                clientProtocol.execute(reader, writer, false);
             } catch (InvalidKeyException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -72,7 +74,7 @@ public class Client extends Thread {
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             try {
-                ClientProtocol.execute(reader, writer, true);
+                clientProtocol.execute(reader, writer, true);
             } catch (InvalidKeyException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
