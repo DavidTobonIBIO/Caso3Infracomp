@@ -132,6 +132,28 @@ public class ServerProtocol {
             System.out.println("C(K_AB1, paquete_id): " + encryptedPackageId);
             System.out.println("HMAC(K_AB2, paquete_id): " + hmacPackageId);
 
+            String decryptedClientId = Symmetric.decipher(K_AB1, "AES", encryptedClientId);
+            String decryptedPackageId = Symmetric.decipher(K_AB1, "AES", encryptedPackageId);
+
+            int clientId = Integer.parseInt(decryptedClientId);
+            System.out.println("uid: " + clientId);
+            int packageId = Integer.parseInt(decryptedPackageId);
+            System.out.println("paquete_id: " + packageId);
+
+            String hmacClientIdGen = Symmetric.generateHMAC(K_AB2, decryptedClientId);
+            String hmacPackageIdGen = Symmetric.generateHMAC(K_AB2, decryptedPackageId);
+
+            String decryptedHmacClientId = Base64.getEncoder().encodeToString(hmacClientId.getBytes());
+            String decryptedHmacPackageId = Base64.getEncoder().encodeToString(hmacPackageId.getBytes());
+
+            if (decryptedHmacClientId.equals(hmacClientIdGen) && decryptedHmacPackageId.equals(hmacPackageIdGen)) {
+                System.out.println("HMACs verificados");
+                writer.write("OK");
+            } else {
+                System.out.println("HMACs no verificados");
+                writer.write("ERROR");
+            }
+
             inputLine = reader.readLine();
         }
         return inputLine;
