@@ -1,4 +1,4 @@
-package SHA1RSA;
+package SHA;
 
 import java.security.InvalidKeyException;
 import java.security.Key;

@@ -11,7 +11,7 @@ import java.util.Base64;
 
 import javax.crypto.SecretKey;
 
-import SHA1RSA.SHA1RSA;
+import SHA.SHA1RSA;
 import asymmetric.Asymmetric;
 import symmetric.Symmetric;
 import java.math.BigInteger;

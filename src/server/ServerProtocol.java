@@ -10,7 +10,7 @@ import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.util.Base64;
 
-import SHA1RSA.SHA1RSA;
+import SHA.SHA1RSA;
 import symmetric.Symmetric;
 
 public class ServerProtocol {
