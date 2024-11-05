@@ -74,19 +74,25 @@ public class ClientProtocol {
 
     private void runIterativeCommunication(BufferedReader reader, PrintWriter writer) throws IOException,
             InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
-        startCommunication(writer);
+        writer.println("SECINIT");
+        generateReto();
+        cipherReto(writer);
+        // TODO: verificar igualdad de respuesta al reto
+        writer.println("OK");
         byte[] firma = diffie(writer, reader);
         boolean check = checkSignature(firma);
         if (check) {
-            writer.println("OK Diffie-Hellman");
+            System.out.println("Firma verificada");
+            writer.println("OK");
             createY();
             writer.println(String.valueOf(YClient));
             getMasterKey(writer, reader);
-            for (int i = 0; i < NUM_ITERATIONS; i++) {
+            for (int i = 1; i <= NUM_ITERATIONS; i++) {
                 // TODO: implementar la parte del cliente iterativo que se repite 32 veces
                 System.out.println("Iteración " + i);
             }
         } else {
+            System.out.println("Falla en la verificacion de la firma");
             writer.println("ERROR");
         }
 

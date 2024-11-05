@@ -33,33 +33,31 @@ public class ServerProtocol {
     public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException,
             NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         String inputLine = reader.readLine();
-
-        System.out.println("Entrada: " + inputLine);
-
-        switch (inputLine) {
-            case "SECINIT":
-                System.out.println("Cliente ha iniciado comunicación segura");
-                getReto(reader, writer);
-                return true;
-
-            case "OK Reto":
+        if (inputLine.equals("SECINIT"))  {
+            System.out.println("Cliente ha iniciado comunicación segura");
+            getReto(reader, writer);
+            inputLine = reader.readLine();
+            if (inputLine.equals("OK")) {
+                System.out.println("Cliente ha respondido correctamente al reto");
                 diffieHellman(writer);
-                return true;
-
-            case "OK Diffie-Hellman":
-                getMasterKey(writer, reader);
-                return true;
-
-            case "TERMINAR":
-                writer.println("Desconexión exitosa");
-                System.out.println("Cliente ha solicitado desconexión.");
-                return false;
-
-            default:
-                writer.println("Comando no reconocido");
-                System.out.println("Comando no reconocido: " + inputLine);
-                return true;
+                inputLine = reader.readLine();
+                if (inputLine.equals("OK")) {
+                    System.out.println("Cliente ha verificado la firma");
+                    getMasterKey(writer, reader);
+                    // TODO: HMAC
+                    inputLine = reader.readLine();
+                    if (inputLine.equals("TERMINAR")) {
+                        writer.println("Desconexión exitosa");
+                        System.out.println("Cliente ha solicitado desconexión.");
+                    }
+                } else {
+                    System.out.println("Falla en la verificacion de la firma");
+                }
+            } else {
+                System.out.println("Cliente no ha respondido correctamente al reto");
+            }
         }
+        return false;
     }
 
     private static void diffieHellman(PrintWriter writer)
