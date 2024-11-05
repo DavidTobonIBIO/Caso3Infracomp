@@ -55,7 +55,7 @@ public class ClientProtocol {
         writer.println("SECINIT");
         generateReto();
         cipherReto(writer);
-        writer.println("OK Reto");
+        writer.println("OK");
     }
 
     private void endCommunication(PrintWriter writer) {
@@ -114,7 +114,7 @@ public class ClientProtocol {
         byte[] firma = diffie(writer, reader);
         boolean check = checkSignature(firma);
         if (check) {
-            writer.println("OK Diffie-Hellman");
+            writer.println("OK");
             createY();
             writer.println(String.valueOf(YClient));
             getMasterKey(writer, reader);
