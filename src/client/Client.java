@@ -1,6 +1,7 @@
 package client;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -15,6 +16,7 @@ public class Client extends Thread {
 
     public Client(int id) {
         this.id = id;
+        ClientProtocol.loadKeys();
     }
 
     public void launchWithConsole() {
@@ -50,19 +52,20 @@ public class Client extends Thread {
                 socket = new Socket(HOST, PORT);
                 writer = new PrintWriter(socket.getOutputStream(), true);
                 reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
+                
                 ClientProtocol.execute(reader, writer);
 
                 reader.close();
                 writer.close();
                 socket.close();
                 continueFlag = false;
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.out.println("Error al conectar con el servidor");
                 e.printStackTrace();
-                System.exit(-1);
+                continueFlag = false;
             }
         }
+        System.out.println("Desconectado del servidor");
     }
 
     public int getClientId() {

@@ -7,25 +7,36 @@ import java.io.PrintWriter;
 public class ServerProtocol {
 
     public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException {
-        String inputLine;
-        String outputLine;
-
-        inputLine = reader.readLine();
+        String inputLine = reader.readLine();
+    
+          
         System.out.println("Entrada: " + inputLine);
-
-        if (inputLine.equals("publickey")) {
-            sendPublicKey(writer);
-            return true;
-        } else if (inputLine.equals("symmetrickey")) {
-            sendSymmetricKey(writer);
-            return true;
-        } else if (inputLine.equals("exit")) {
-            outputLine = "exit";
-            writer.println(outputLine);
-            return false;
+    
+        switch (inputLine) {
+            case "SECINIT":
+                System.out.println("Cliente ha iniciado comunicación segura");
+                return true;
+                
+            case "publickey":
+                sendPublicKey(writer);
+                return true;
+    
+            case "symmetrickey":
+                sendSymmetricKey(writer);
+                return true;
+    
+            case "TERMINAR":
+                writer.println("Desconexión exitosa");
+                System.out.println("Cliente ha solicitado desconexión.");
+                return false;
+    
+            default:
+                writer.println("Comando no reconocido");
+                System.out.println("Comando no reconocido: " + inputLine);
+                return true;
         }
-        return true;
     }
+    
 
     private static void sendPublicKey(PrintWriter writer) {
         System.out.println("Enviando llave publica");

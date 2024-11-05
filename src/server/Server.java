@@ -87,25 +87,19 @@ public class Server {
         try {
             serverSocket = new ServerSocket(PORT);
             int id = 1;
-            while (continueFlag) {
-                System.out.println("Servidor Monothread esperando conexión");
-                Socket socket = serverSocket.accept();
-                System.out.println("Cliente " + id + " conectado: " + socket.getInetAddress().getHostAddress());
+            System.out.println("Servidor Monothread esperando conexión");
+            Socket socket = serverSocket.accept();
+            System.out.println("Cliente " + id + " conectado: " + socket.getInetAddress().getHostAddress());
 
-                PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                while (ServerProtocol.execute(reader, writer))
-                    ;
-
-                writer.close();
-                reader.close();
-                socket.close();
-                id++;
-                if (id > MAX_CLIENTS) {
-                    continueFlag = false;
-                }
-            }
+            while (ServerProtocol.execute(reader, writer));
+                
+            writer.close();
+            reader.close();
+            socket.close();
+            id++;
             serverSocket.close();
             System.out.println("Servidor finalizado, atendio a " + (id - 1) + " clientes");
         } catch (IOException e) {
@@ -133,18 +127,26 @@ public class Server {
                 threadPool.execute(serverThread);
                 id++;
                 if (id > MAX_CLIENTS) {
+                    System.out.println("Limite de clientes alcanzado. No se aceptarán más conexiones.");
                     continueFlag = false;
                 }
             }
         } catch (IOException e) {
             System.out.println("Error al iniciar el servidor");
             e.printStackTrace();
-            System.exit(-1);
         } finally {
             if (threadPool != null && !threadPool.isShutdown()) {
                 threadPool.shutdown();
             }
+            try {
+                if (serverSocket != null && !serverSocket.isClosed()) {
+                    serverSocket.close();
+                }
+            } catch (IOException e) {
+                System.out.println("Error al cerrar el servidor");
+                e.printStackTrace();
+            }
+            System.out.println("Servidor finalizado.");
         }
     }
-
 }
