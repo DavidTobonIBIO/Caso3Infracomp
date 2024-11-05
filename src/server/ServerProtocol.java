@@ -44,8 +44,8 @@ public class ServerProtocol {
 
     private static void diffieHellman(PrintWriter writer) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
         try {
-            String[] GP = Symmetric.generatePG("C:\\Users\\laura\\Downloads\\OpenSSL-1.1.1h_win32\\OpenSSL-1.1.1h_win32");
-            System.out.println("Llaves generadas");
+            String[] GP = Symmetric.generatePG("OpenSSL-1.1.1h_win32");
+            System.out.println("Llaves simetricas generadas");
             int G = Integer.parseInt(GP[1]);
             BigInteger P = Symmetric.parser(GP[0]);
             writer.println(String.valueOf(G));
