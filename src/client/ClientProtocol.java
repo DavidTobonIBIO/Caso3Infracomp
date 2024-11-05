@@ -30,7 +30,7 @@ public class ClientProtocol {
 
     public static void execute(BufferedReader reader, PrintWriter writer) throws IOException {
         startCommunication(writer);
-        diffie(writer, reader);
+        //diffie(writer, reader);
         disconnect(writer);
     }
 
@@ -67,7 +67,7 @@ public class ClientProtocol {
         String firma = reader.readLine();
         byte[] firmaByte = Base64.getDecoder().decode(firma);
         String message = P + G + Y;
-        //System.out.println("firma: " + firma);
+        
         try {
             boolean check = checkSignature(firmaByte, message);
             System.out.println(check);
