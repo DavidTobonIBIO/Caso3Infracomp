@@ -7,11 +7,13 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
 import javax.crypto.SecretKey;
 
 import SHA.SHA1RSA;
+import SHA.SHA512;
 import asymmetric.Asymmetric;
 import symmetric.Symmetric;
 import java.math.BigInteger;
@@ -26,13 +28,15 @@ public class ClientProtocol {
     private static String Y;
     private static BigInteger YClient;
     private static BigInteger x;
+    private static PublicKey K_AB1;
+    private static PublicKey K_AB2;
 
     public static void loadKeys() {
         loadKey("RSA");
         loadKey("AES");
     }
 
-    public static void execute(BufferedReader reader, PrintWriter writer, boolean isIterative) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+    public static void execute(BufferedReader reader, PrintWriter writer, boolean isIterative) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         if (isIterative) {
             runIterativeCommunication(reader, writer);
         } else {
@@ -64,7 +68,7 @@ public class ClientProtocol {
         }        
     }
 
-    private static void runIterativeCommunication(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+    private static void runIterativeCommunication(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         startCommunication(writer);
         byte[] firma = diffie(writer, reader);
         boolean check = checkSignature(firma);
@@ -84,7 +88,7 @@ public class ClientProtocol {
         endCommunication(writer);
     }
 
-    private static void runConcurrentCommunication(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+    private static void runConcurrentCommunication(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         startCommunication(writer);
         byte[] firma = diffie(writer, reader);
         boolean check = checkSignature(firma);
@@ -125,9 +129,12 @@ public class ClientProtocol {
         return check;
     }
 
-    public static void getMasterKey(PrintWriter writer, BufferedReader reader) throws IOException{
+    public static void getMasterKey(PrintWriter writer, BufferedReader reader) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException{
         BigInteger YServer = new BigInteger(Y);
         BigInteger master = YServer.modPow(x, new BigInteger(P));
+        PublicKey[] masterKeys = SHA512.encrypt(String.valueOf(master));
+        K_AB1 = masterKeys[0];
+        K_AB2 = masterKeys[1];
         //System.out.println(String.valueOf(master));
     }
 }

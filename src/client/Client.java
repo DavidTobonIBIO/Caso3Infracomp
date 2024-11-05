@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
 public class Client extends Thread {
 
@@ -41,6 +42,9 @@ public class Client extends Thread {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (SignatureException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InvalidKeySpecException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
@@ -78,7 +82,10 @@ public class Client extends Thread {
             } catch (SignatureException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }
+            } catch (InvalidKeySpecException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
 
             reader.close();
             writer.close();
