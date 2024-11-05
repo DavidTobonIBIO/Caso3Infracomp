@@ -4,13 +4,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SignatureException;
+import java.util.Base64;
 
 import SHA1RSA.SHA1RSA;
 import symmetric.Symmetric;
 
 public class ServerProtocol {
 
-    public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException {
+    public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         String inputLine = reader.readLine();
     
           
@@ -56,7 +61,7 @@ public class ServerProtocol {
         writer.println("symmetrickey");
     }
 
-    private static void diffieHellman(PrintWriter writer){
+    private static void diffieHellman(PrintWriter writer) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
         try {
             String[] GP = Symmetric.generatePG("C:\\Users\\laura\\Downloads\\OpenSSL-1.1.1h_win32\\OpenSSL-1.1.1h_win32");
             System.out.println("Llaves generadas");
@@ -65,9 +70,9 @@ public class ServerProtocol {
             writer.println(String.valueOf(G));
             writer.println(String.valueOf(P));
             BigInteger Y = Symmetric.generateY(P, G);
-            System.out.println(String.valueOf(Y));
+            //System.out.println(String.valueOf(Y));
             writer.println(String.valueOf(Y));
-            sign(P, Y, G);
+            sign(P, Y, G, writer);
 
         } catch (IOException | InterruptedException e) {
             // TODO Auto-generated catch block
@@ -75,18 +80,22 @@ public class ServerProtocol {
         }
     }
 
-    private static void getPrivateKey(){
-
+    private static PrivateKey getPrivateKey(){
+        PrivateKey privateKey = Server.getPrivateKey();
+        return privateKey;
     }
 
-    private static void sign(BigInteger P, BigInteger Y, int G){
+    private static void sign(BigInteger P, BigInteger Y, int G, PrintWriter writer) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
         String pString = String.valueOf(P);
         String gString = String.valueOf(G);
         String yString = String.valueOf(Y);
 
         String message = pString + gString + yString;
-        //SHA1RSA.sign(null, message);
-
+        byte[] firma = SHA1RSA.sign(getPrivateKey(), message);
+        
+        String firmaString = Base64.getEncoder().encodeToString(firma);
+        //System.out.println(firmaString);
+        writer.println(firmaString);
     }
     
 }

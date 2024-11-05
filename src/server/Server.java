@@ -6,7 +6,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.SignatureException;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,64 +26,68 @@ public class Server {
 
     private boolean continueFlag = true;
     private int nThreads;
-    private PrivateKey privateKey;
-    private SecretKey symmetricKey;
-
-    public void launchWithConsole() {
-        Scanner scanner = new Scanner(System.in);
-        boolean inMenu = true;
-
-        while (inMenu) {
-            System.out.println(
-                    "\nBienvenido al SERVIDOR, seleccione una de las opciones: \n1. Generar pareja de llaves \n2. Ejecutar \n0. Salir");
-            int option = scanner.nextInt();
-            switch (option) {
-                case 1:
-                    System.out.println("Generando llaves...");
-                    generateKeys();
-                    
-                    
-                    break;
-                case 2:
-                    boolean check = true;
-                    while (check) {
-                        System.out.println(
-                                "Ingrese el numero de delegados concurrentes (1 para proceso iterativo, 4, 8, 32):");
-                        nThreads = scanner.nextInt();
-                        if (nThreads > 0) {
-                            check = false;
-                            launch();
-                        } else {
-                            System.out.println("Número de delegados no permitido");
+    private static PrivateKey privateKey;
+        private SecretKey symmetricKey;
+    
+        public void launchWithConsole() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+            Scanner scanner = new Scanner(System.in);
+            boolean inMenu = true;
+    
+            while (inMenu) {
+                System.out.println(
+                        "\nBienvenido al SERVIDOR, seleccione una de las opciones: \n1. Generar pareja de llaves \n2. Ejecutar \n0. Salir");
+                int option = scanner.nextInt();
+                switch (option) {
+                    case 1:
+                        System.out.println("Generando llaves...");
+                        generateKeys();
+                        
+                        
+                        break;
+                    case 2:
+                        boolean check = true;
+                        while (check) {
+                            System.out.println(
+                                    "Ingrese el numero de delegados concurrentes (1 para proceso iterativo, 4, 8, 32):");
+                            nThreads = scanner.nextInt();
+                            if (nThreads > 0) {
+                                check = false;
+                                launch();
+                            } else {
+                                System.out.println("Número de delegados no permitido");
+                            }
                         }
-                    }
-                    inMenu = false;
-                    break;
-                case 0:
-                    System.out.println("Saliendo...");
-                    inMenu = false;
-                    break;
-                default:
-                    System.out.println("Opción no válida");
-                    break;
+                        inMenu = false;
+                        break;
+                    case 0:
+                        System.out.println("Saliendo...");
+                        inMenu = false;
+                        break;
+                    default:
+                        System.out.println("Opción no válida");
+                        break;
+                }
+    
             }
-
+            scanner.close();
+    
         }
-        scanner.close();
-
+    
+        public void setUp(int nDelegates) {
+            this.nThreads = nDelegates;
+            generateKeys();
+        }
+    
+        private void generateKeys() {
+            Symmetric.generateKeys("AES");
+            Asymmetric.generateKeys("RSA");
+        }
+        
+        public static PrivateKey getPrivateKey(){
+            return privateKey;
     }
 
-    public void setUp(int nDelegates) {
-        this.nThreads = nDelegates;
-        generateKeys();
-    }
-
-    private void generateKeys() {
-        Symmetric.generateKeys("AES");
-        Asymmetric.generateKeys("RSA");
-    }
-
-    public void launch() {
+    public void launch() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         System.out.println("Inicializando Servidor...");
         try {
             privateKey = Asymmetric.loadPrivateKey("RSA");
@@ -97,7 +104,7 @@ public class Server {
         }
     }
 
-    private void startMonothreadServer() {
+    private void startMonothreadServer() throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(PORT);
