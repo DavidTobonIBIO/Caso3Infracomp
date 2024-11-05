@@ -25,14 +25,6 @@ public class ServerProtocol {
             case "SECINIT":
                 System.out.println("Cliente ha iniciado comunicación segura");
                 return true;
-                
-            case "publickey":
-                sendPublicKey(writer);
-                return true;
-    
-            case "symmetrickey":
-                sendSymmetricKey(writer);
-                return true;
 
             case "OK Reto":
                 diffieHellman(writer);
@@ -48,17 +40,6 @@ public class ServerProtocol {
                 System.out.println("Comando no reconocido: " + inputLine);
                 return true;
         }
-    }
-    
-
-    private static void sendPublicKey(PrintWriter writer) {
-        System.out.println("Enviando llave publica");
-        writer.println("publickey");
-    }
-
-    private static void sendSymmetricKey(PrintWriter writer) {
-        System.out.println("Enviando llave simetrica");
-        writer.println("symmetrickey");
     }
 
     private static void diffieHellman(PrintWriter writer) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException{
