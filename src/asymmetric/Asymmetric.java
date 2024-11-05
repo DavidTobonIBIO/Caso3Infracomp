@@ -83,10 +83,9 @@ public class Asymmetric {
 
     public static byte[] cipher(Key key, String algorithm, String msg) {
         byte[] encryptedMsg = null;
-        System.out.println("Llave: " + key);
+        byte[] mensajeBytes = Base64.getDecoder().decode(msg);
         try {
             Cipher cipher = Cipher.getInstance(algorithm);
-            byte[] mensajeBytes = msg.getBytes();
             cipher.init(Cipher.ENCRYPT_MODE, key);
             encryptedMsg = cipher.doFinal(mensajeBytes);
         } catch (Exception e) {
@@ -96,13 +95,13 @@ public class Asymmetric {
         return encryptedMsg;
     }
 
-    public static byte[] decipher(Key key, String algorithm, byte[] msg) {
+    public static byte[] decipher(Key key, String algorithm, String msg) {
         byte[] decryptedMsg = null;
-
+        byte[] msgBytes = Base64.getDecoder().decode(msg);
         try {
             Cipher cipher = Cipher.getInstance(algorithm);
             cipher.init(Cipher.DECRYPT_MODE, key);
-            decryptedMsg = cipher.doFinal(msg);
+            decryptedMsg = cipher.doFinal(msgBytes);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -44,8 +44,7 @@ public class ServerProtocol {
                     System.out.println("Cliente ha verificado la firma");
                     getMasterKey(writer, reader);
                     // TODO: HMAC
-                    getPackageRequest(reader, writer);
-                    inputLine = reader.readLine();
+                    inputLine = getPackageRequest(reader, writer);
                     if (inputLine.equals("TERMINAR")) {
                         System.out.println("Cliente ha solicitado desconexion.");
                         writer.println("Desconexion exitosa");
@@ -113,24 +112,28 @@ public class ServerProtocol {
     }
 
     public static void getReto(BufferedReader reader, PrintWriter writer) throws IOException {
-        String reto = reader.readLine();
-        byte[] retoByte = Base64.getDecoder().decode(reto);
+        String reto = reader.readLine();;
         PrivateKey privateKey = getPrivateKey();
-        byte[] rta = Asymmetric.decipher(privateKey, "RSA", retoByte);
+        byte[] rta = Asymmetric.decipher(privateKey, "RSA", reto);
         String encodedK_AB1 = Base64.getEncoder().encodeToString(rta);
         System.out.println(encodedK_AB1);
     }
 
-    public static void getPackageRequest(BufferedReader reader, PrintWriter writer) throws IOException {
-        String encryptedClientId = reader.readLine();
-        String hmacClientId = reader.readLine();
-        String encryptedPackageId = reader.readLine();
-        String hmacPackageId = reader.readLine();
+    public static String getPackageRequest(BufferedReader reader, PrintWriter writer) throws IOException {
+        String inputLine = reader.readLine();
+        while (!inputLine.equals("TERMINAR")) {
+            String encryptedClientId = inputLine;
+            String hmacClientId = reader.readLine();
+            String encryptedPackageId = reader.readLine();
+            String hmacPackageId = reader.readLine();
 
-        System.out.println("C(K_AB1, uid): " + encryptedClientId);
-        System.out.println("HMAC(K_AB2, uid): " + hmacClientId);
-        System.out.println("C(K_AB1, paquete_id): " + encryptedPackageId);
-        System.out.println("HMAC(K_AB2, paquete_id): " + hmacPackageId);
-        
+            System.out.println("C(K_AB1, uid): " + encryptedClientId);
+            System.out.println("HMAC(K_AB2, uid): " + hmacClientId);
+            System.out.println("C(K_AB1, paquete_id): " + encryptedPackageId);
+            System.out.println("HMAC(K_AB2, paquete_id): " + hmacPackageId);
+
+            inputLine = reader.readLine();
+        }
+        return inputLine;
     }
 }

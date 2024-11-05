@@ -165,7 +165,8 @@ public class ClientProtocol {
 
     public void generateReto() {
         Random rand = new Random();
-        reto = new BigInteger(116, rand);
+        reto = new BigInteger(116, rand).abs();
+
     }
 
     public void cipherReto(PrintWriter writer) {
