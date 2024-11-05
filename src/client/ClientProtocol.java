@@ -89,7 +89,7 @@ public class ClientProtocol {
             getMasterKey(writer, reader);
             for (int i = 1; i <= NUM_ITERATIONS; i++) {
                 // TODO: implementar la parte del cliente iterativo que se repite 32 veces
-                System.out.println("Iteración " + i);
+                System.out.println("Iteracion " + i);
             }
         } else {
             System.out.println("Falla en la verificacion de la firma");
@@ -163,7 +163,7 @@ public class ClientProtocol {
         String retoString = String.valueOf(reto);
         byte[] encryptedReto = Asymmetric.cipher(publicKey, "RSA", retoString);
         System.out.println("Cifrado: " + String.valueOf(encryptedReto));
-        String encodedK_AB1 = Base64.getEncoder().encodeToString(encryptedReto);
-        writer.println(encodedK_AB1);
+        String encryptedRetoString = Base64.getEncoder().encodeToString(encryptedReto);
+        writer.println(encryptedRetoString);
     }
 }

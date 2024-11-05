@@ -7,7 +7,6 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
@@ -34,7 +33,7 @@ public class ServerProtocol {
             NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         String inputLine = reader.readLine();
         if (inputLine.equals("SECINIT"))  {
-            System.out.println("Cliente ha iniciado comunicación segura");
+            System.out.println("Cliente ha iniciado comunicacion segura");
             getReto(reader, writer);
             inputLine = reader.readLine();
             if (inputLine.equals("OK")) {
@@ -47,8 +46,8 @@ public class ServerProtocol {
                     // TODO: HMAC
                     inputLine = reader.readLine();
                     if (inputLine.equals("TERMINAR")) {
-                        writer.println("Desconexión exitosa");
-                        System.out.println("Cliente ha solicitado desconexión.");
+                        System.out.println("Cliente ha solicitado desconexion.");
+                        writer.println("Desconexion exitosa");
                     }
                 } else {
                     System.out.println("Falla en la verificacion de la firma");
