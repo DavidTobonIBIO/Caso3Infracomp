@@ -14,12 +14,15 @@ public class Client extends Thread {
 
     private static final int PORT = 3400;
     private static final String HOST = "localhost";
-    private ClientProtocol clientProtocol = new ClientProtocol();
+    private ClientProtocol clientProtocol;
 
     private int id;
+    private int packageId;
 
-    public Client(int id) {
+    public Client(int id, int packageId) {
         this.id = id;
+        this.packageId = packageId;
+        clientProtocol = new ClientProtocol(this);
     }
 
     @Override
@@ -90,7 +93,33 @@ public class Client extends Thread {
         }
     }
 
+    /**
+     * @return the id
+     */
     public int getClientId() {
         return id;
     }
+
+    /**
+     * @param id the id to set
+     */
+    public void setClientId(int id) {
+        this.id = id;
+    }
+
+    /**
+     * @return the packageId
+     */
+    public int getPackageId() {
+        return packageId;
+    }
+
+    /**
+     * @param packageId the packageId to set
+     */
+    public void setPackageId(int packageId) {
+        this.packageId = packageId;
+    }
+
+    
 }

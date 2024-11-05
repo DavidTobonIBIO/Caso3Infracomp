@@ -11,7 +11,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Random;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 
 import SHA.SHA1RSA;
 import SHA.SHA512;
@@ -32,6 +34,11 @@ public class ClientProtocol {
     private SecretKey K_AB1;
     private SecretKey K_AB2;
     private BigInteger reto;
+    private Client client;
+
+    public ClientProtocol(Client client) {
+        this.client = client;
+    }
 
     public void loadKeys() {
         loadKey("RSA");
@@ -88,8 +95,10 @@ public class ClientProtocol {
             writer.println(String.valueOf(YClient));
             getMasterKey(writer, reader);
             for (int i = 1; i <= NUM_ITERATIONS; i++) {
-                // TODO: implementar la parte del cliente iterativo que se repite 32 veces
                 System.out.println("Iteracion " + i);
+                client.setClientId(i);
+                client.setPackageId(i);
+                executePackgeRequest(writer);
             }
         } else {
             System.out.println("Falla en la verificacion de la firma");
@@ -166,4 +175,30 @@ public class ClientProtocol {
         String encryptedRetoString = Base64.getEncoder().encodeToString(encryptedReto);
         writer.println(encryptedRetoString);
     }
+
+    private String symmetricCipher(int id) {
+        String idString = String.valueOf(id);
+        byte[] encryptedClientId = Symmetric.cipher(K_AB1, "AES", idString);
+        return Base64.getEncoder().encodeToString(encryptedClientId);
+    }
+
+    private void decryptPackageState() {
+        // TODO: cipher package state
+    }
+
+    private String generateHMAC(int id) {
+        String idString = String.valueOf(id);
+        byte[] hmacClientId = Symmetric.generateHMAC(K_AB2, idString);
+        return Base64.getEncoder().encodeToString(hmacClientId);
+    }
+
+    private void executePackgeRequest(PrintWriter writer) {
+        String encryptedClientId = symmetricCipher(client.getClientId());
+        String hmacClientId = generateHMAC(client.getClientId());
+        
+        writer.println("C(K_AB1, uid): " + encryptedClientId);
+        writer.println("HMAC(K_AB2, uid): " + hmacClientId);
+
+    }
+
 }

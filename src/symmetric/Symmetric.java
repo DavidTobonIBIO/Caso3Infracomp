@@ -5,6 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.util.Base64;
@@ -12,13 +15,17 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Symmetric {
 
     private static final String KEY_FILE_PATH = "keys/symmetric.key";
+    private final static String PADDING = "AES/ECB/PKCS5Padding";
 
     public static void generateKeys(String algorithm) {
         System.out.println("Generando llave simétrica...");
@@ -119,5 +126,39 @@ public class Symmetric {
         byte[] decodedKey = Base64.getDecoder().decode(keyContent);
 
         return new SecretKeySpec(decodedKey, algorithm);
+    }
+
+    public static byte[] cipher(SecretKey key, String algorithm, String msg) {
+        try {
+            if (algorithm.equals("AES")) {
+                Cipher cipher = Cipher.getInstance(PADDING);
+                byte[] ivBytes = new byte[16];
+                SecureRandom secureRandom = new SecureRandom();
+                secureRandom.nextBytes(ivBytes);
+                IvParameterSpec iv = new IvParameterSpec(ivBytes);
+                cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+
+                byte[] encryptedBytes = cipher.doFinal(msg.getBytes());
+                return encryptedBytes;
+            }
+        } catch (Exception e) {
+            System.out.println("Error al cifrar mensaje");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static byte[] generateHMAC(SecretKey key, String clientId) {
+        Mac mac;
+        try {
+            mac = Mac.getInstance("HmacSHA384");
+            mac.init(key);
+            byte[] hmacBytes = mac.doFinal(clientId.getBytes());
+            return hmacBytes;
+        } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+            System.out.println("Error al generar HMAC");
+            e.printStackTrace();
+            return null;
+        }
     }
 }

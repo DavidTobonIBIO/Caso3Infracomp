@@ -17,14 +17,14 @@ public class ClientApp {
             int option = scanner.nextInt();
             if (option == 1) {
                 System.out.println("Inicializando Cliente Iterativo...");
-                Client client = new Client(0);
+                Client client = new Client(0, 0);
                 client.startIterativeClient();
                 inMenu = false;
             } else if (option == 2) {
                 System.out.println("Inicializando Clientes Concurrentes...");
                 Thread[] clients = new Thread[NUM_ITERATIONS];
                 for (int i = 0; i < clients.length; i++) {
-                    Client client = new Client(i);
+                    Client client = new Client(i, i);
                     clients[i] = client;
                     client.start();
                 }
