@@ -5,12 +5,16 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import java.security.PublicKey;
 
 public class SHA512 {
     private static String ALGORITHM = "SHA-512";
 
-    public static PublicKey[] encrypt(String message) throws NoSuchAlgorithmException, InvalidKeySpecException{
+    public static SecretKey[] encrypt(String message) throws NoSuchAlgorithmException, InvalidKeySpecException{
         MessageDigest digest = MessageDigest.getInstance(ALGORITHM);
         byte[] messageByte = digest.digest(message.getBytes());
         int size = messageByte.length/2;
@@ -20,9 +24,9 @@ public class SHA512 {
         System.arraycopy(messageByte, 0, K_AB1, 0, size);
         System.arraycopy(messageByte, size, K_AB2, 0, K_AB2.length);
 
-        PublicKey K_AB1Key = generatePublicKey(K_AB1);
-        PublicKey K_AB2Key = generatePublicKey(K_AB2);
-        PublicKey[] publicKeys =  new PublicKey[] {K_AB1Key, K_AB2Key};
+        SecretKey K_AB1Key = new SecretKeySpec(K_AB1, 0, K_AB1.length, "AES");
+        SecretKey K_AB2Key = new SecretKeySpec(K_AB2, 0, K_AB2.length, "AES");
+        SecretKey[] publicKeys =  new SecretKey[] {K_AB1Key, K_AB2Key};
         return publicKeys;
     }
 

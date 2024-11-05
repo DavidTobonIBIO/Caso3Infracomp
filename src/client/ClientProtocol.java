@@ -28,8 +28,8 @@ public class ClientProtocol {
     private static String Y;
     private static BigInteger YClient;
     private static BigInteger x;
-    private static PublicKey K_AB1;
-    private static PublicKey K_AB2;
+    private static SecretKey K_AB1;
+    private static SecretKey K_AB2;
 
     public static void loadKeys() {
         loadKey("RSA");
@@ -132,9 +132,13 @@ public class ClientProtocol {
     public static void getMasterKey(PrintWriter writer, BufferedReader reader) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException{
         BigInteger YServer = new BigInteger(Y);
         BigInteger master = YServer.modPow(x, new BigInteger(P));
-        PublicKey[] masterKeys = SHA512.encrypt(String.valueOf(master));
+        SecretKey[] masterKeys = SHA512.encrypt(String.valueOf(master));
         K_AB1 = masterKeys[0];
         K_AB2 = masterKeys[1];
+        String encodedK_AB1 = Base64.getEncoder().encodeToString(K_AB1.getEncoded());
+        String encodedK_AB2 = Base64.getEncoder().encodeToString(K_AB2.getEncoded());
+        System.out.println(encodedK_AB1);
+        System.out.println(encodedK_AB2); 
         //System.out.println(String.valueOf(master));
     }
 }

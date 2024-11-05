@@ -12,6 +12,8 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
+import javax.crypto.SecretKey;
+
 import SHA.SHA1RSA;
 import SHA.SHA512;
 import symmetric.Symmetric;
@@ -23,8 +25,8 @@ public class ServerProtocol {
     private static BigInteger x;
 
     private static final String OPEN_SSL_PATH = "OpenSSL-1.1.1h_win32";
-    private static PublicKey K_AB1;
-    private static PublicKey K_AB2;
+    private static SecretKey K_AB1;
+    private static SecretKey K_AB2;
 
     public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         String inputLine = reader.readLine();
@@ -100,9 +102,12 @@ public class ServerProtocol {
         String YClient = reader.readLine();
         BigInteger YClient_int = new BigInteger(YClient);
         BigInteger master = YClient_int.modPow(x, P);
-        PublicKey[] masterKeys = SHA512.encrypt(String.valueOf(master));
+        SecretKey[] masterKeys = SHA512.encrypt(String.valueOf(master));
         K_AB1 = masterKeys[0];
         K_AB2 = masterKeys[1];
-        //System.out.println(String.valueOf(master));  
+        String encodedK_AB1 = Base64.getEncoder().encodeToString(K_AB1.getEncoded());
+        String encodedK_AB2 = Base64.getEncoder().encodeToString(K_AB2.getEncoded());
+        System.out.println(encodedK_AB1);
+        System.out.println(encodedK_AB2);  
     }
 }
