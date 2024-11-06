@@ -170,9 +170,9 @@ public class ClientProtocol {
     }
 
     public void cipherReto(PrintWriter writer) {
-        String retoString = String.valueOf(reto);
+        String retoString = reto.toString();
         byte[] encryptedReto = Asymmetric.cipher(publicKey, "RSA", retoString);
-        System.out.println("Cifrado: " + String.valueOf(encryptedReto));
+        System.out.println("Reto Cifrado: " + Base64.getEncoder().encodeToString(encryptedReto));
         String encryptedRetoString = Base64.getEncoder().encodeToString(encryptedReto);
         writer.println(encryptedRetoString);
     }

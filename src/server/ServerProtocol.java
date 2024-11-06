@@ -135,10 +135,8 @@ public class ServerProtocol {
             String decryptedClientId = Symmetric.decipher(K_AB1, "AES", encryptedClientId);
             String decryptedPackageId = Symmetric.decipher(K_AB1, "AES", encryptedPackageId);
 
-            int clientId = Integer.parseInt(decryptedClientId);
-            System.out.println("uid: " + clientId);
-            int packageId = Integer.parseInt(decryptedPackageId);
-            System.out.println("paquete_id: " + packageId);
+            System.out.println("uid: " + decryptedClientId);
+            System.out.println("paquete_id: " + decryptedPackageId);
 
             String hmacClientIdGen = Symmetric.generateHMAC(K_AB2, decryptedClientId);
             String hmacPackageIdGen = Symmetric.generateHMAC(K_AB2, decryptedPackageId);

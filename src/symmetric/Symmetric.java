@@ -137,7 +137,7 @@ public class Symmetric {
                 secureRandom.nextBytes(ivBytes);
                 IvParameterSpec iv = new IvParameterSpec(ivBytes);
                 cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-
+                
                 byte[] encryptedBytes = cipher.doFinal(msg.getBytes());
                 byte[] combined = new byte[ivBytes.length + encryptedBytes.length];
                 // Concatenar iv y mensaje cifrado
@@ -147,6 +147,8 @@ public class Symmetric {
                 for (int i = 0; i < encryptedBytes.length; i++) {
                     combined[i + ivBytes.length] = encryptedBytes[i];
                 }
+
+                System.out.println("Mensaje cifrado: " + Base64.getEncoder().encodeToString(combined));
 
                 return Base64.getEncoder().encodeToString(combined);
             }
@@ -162,20 +164,25 @@ public class Symmetric {
             if (algorithm.equals("AES")) {
                 Cipher cipher = Cipher.getInstance(PADDING);
     
-                byte[] combined = Base64.getDecoder().decode(msg);
+                byte[] combined = msg.getBytes();
     
                 // Extraer iv que son los primeros 16 bytes
                 byte[] ivBytes = new byte[16];
-                System.arraycopy(combined, 0, ivBytes, 0, ivBytes.length);
+                for (int i = 0; i < ivBytes.length; i++) {
+                    ivBytes[i] = combined[i];
+                }
                 IvParameterSpec iv = new IvParameterSpec(ivBytes);
     
                 // Decifrar el mensaje que son los bytes restantes
                 byte[] encryptedBytes = new byte[combined.length - ivBytes.length];
-                System.arraycopy(combined, ivBytes.length, encryptedBytes, 0, encryptedBytes.length);
-    
+                for (int i = 0; i < encryptedBytes.length; i++) {
+                    encryptedBytes[i] = combined[i + ivBytes.length];
+                }
+                
                 cipher.init(Cipher.DECRYPT_MODE, key, iv);
     
                 byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+                System.out.println("Mensaje descifrado: " + Base64.getEncoder().encodeToString(decryptedBytes));
                 return Base64.getEncoder().encodeToString(decryptedBytes);
             }
         } catch (Exception e) {
