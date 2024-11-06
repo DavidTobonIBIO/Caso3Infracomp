@@ -2,9 +2,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import client.Client;
-import server.Server;
-
 public class TestRunnerApp {
 
     public static void createOutputFile() {
