@@ -66,9 +66,6 @@ public class ClientProtocol {
             if (algorithm.equals("RSA")) {
                 publicKey = Asymmetric.loadPublicKey(algorithm);
             }
-            // else if (algorithm.equals("AES")) {
-            // symmetricKey = Symmetric.loadKey(algorithm);
-            // }
         } catch (Exception e) {
             System.out.println("Error al cargar las llaves");
             e.printStackTrace();
@@ -78,7 +75,7 @@ public class ClientProtocol {
 
     private void runIterativeCommunication(BufferedReader reader, PrintWriter writer) throws IOException,
             InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
-        writer.println("SECINIT");
+        startCommunication(writer);
         generateReto();
         cipherReto(writer);
         String rta = reader.readLine();
@@ -103,12 +100,10 @@ public class ClientProtocol {
                     client.setPackageId(i);
                     executePackgeRequest(reader, writer);
                 }
-                writer.println("TERMINAR");
-
-                } else {
-                    System.out.println("Falla en la verificacion de la firma");
-                    writer.println("ERROR");
-                }
+            } else {
+                System.out.println("Falla en la verificacion de la firma");
+                writer.println("ERROR");
+            }
         }else{
             System.out.println("Error de reto");
             writer.println("ERROR");
@@ -136,7 +131,6 @@ public class ClientProtocol {
                 writer.println(String.valueOf(YClient));
                 getMasterKey(reader, writer);
                 executePackgeRequest(reader, writer);
-                writer.println("TERMINAR");
             } else {
                 writer.println("ERROR");
             }
@@ -199,7 +193,6 @@ public class ClientProtocol {
         System.out.println("Reto Cifrado: " + Base64.getEncoder().encodeToString(encryptedReto));
         String encryptedRetoString = Base64.getEncoder().encodeToString(encryptedReto);
         writer.println(encryptedRetoString);
-        //System.out.println("cypher" + encryptedRetoString);
     }
 
     private String symmetricCipher(int id) {

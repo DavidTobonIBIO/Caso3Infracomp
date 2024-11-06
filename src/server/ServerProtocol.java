@@ -47,7 +47,6 @@ public class ServerProtocol {
                 if (inputLine.equals("OK")) {
                     System.out.println("Cliente ha verificado la firma");
                     getMasterKey(writer, reader);
-                    // TODO: HMAC
                     inputLine = getPackageRequest(reader, writer);
                     if (inputLine.equals("TERMINAR")) {
                         System.out.println("Cliente ha solicitado desconexion.");

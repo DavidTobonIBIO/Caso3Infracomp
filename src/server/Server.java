@@ -89,7 +89,6 @@ public class Server {
         System.out.println("Inicializando Servidor...");
         try {
             privateKey = Asymmetric.loadPrivateKey("RSA");
-            // symmetricKey = Symmetric.loadKey("AES");
         } catch (Exception e) {
             System.out.println("Error al cargar las llaves");
             e.printStackTrace();
@@ -147,10 +146,6 @@ public class Server {
                 ServerThread serverThread = new ServerThread(socket, id);
                 threadPool.execute(serverThread);
                 id++;
-                // if (id > MAX_CLIENTS) {
-                //     System.out.println("Limite de clientes alcanzado. No se aceptarán más conexiones.");
-                //     continueFlag = false;
-                // }
             }
         } catch (IOException e) {
             System.out.println("Error al iniciar el servidor");
