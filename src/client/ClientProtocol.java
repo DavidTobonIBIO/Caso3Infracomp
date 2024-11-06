@@ -54,9 +54,6 @@ public class ClientProtocol {
 
     private void startCommunication(PrintWriter writer) throws UnsupportedEncodingException {
         writer.println("SECINIT");
-        generateReto();
-        cipherReto(writer);
-        writer.println("OK");
     }
 
     private void endCommunication(PrintWriter writer) {
@@ -84,9 +81,10 @@ public class ClientProtocol {
         generateReto();
         cipherReto(writer);
         String rta = reader.readLine();
-        System.out.println("rta: " + rta);
         byte[] rtaDecode = Base64.getDecoder().decode(rta);
         BigInteger rtaBig = new BigInteger(rtaDecode); 
+        System.out.println("reto: " + reto.toString());
+        System.out.println("rta: " + rtaBig.toString());
         // TODO: verificar igualdad de respuesta al reto
         if (reto.compareTo(rtaBig) == 0){
             writer.println("OK");
@@ -120,14 +118,26 @@ public class ClientProtocol {
     private void runConcurrentCommunication(BufferedReader reader, PrintWriter writer) throws IOException,
             InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         startCommunication(writer);
-        byte[] firma = diffie(writer, reader);
-        boolean check = checkSignature(firma);
-        if (check) {
+        generateReto();
+        cipherReto(writer);
+        String rta = reader.readLine();
+        System.out.println("rta: " + rta);
+        byte[] rtaDecode = Base64.getDecoder().decode(rta);
+        BigInteger rtaBig = new BigInteger(rtaDecode); 
+        if (reto.compareTo(rtaBig) == 0){
             writer.println("OK");
-            createY();
-            writer.println(String.valueOf(YClient));
-            getMasterKey(reader, writer);
-        } else {
+            byte[] firma = diffie(writer, reader);
+            boolean check = checkSignature(firma);
+            if (check) {
+                writer.println("OK");
+                createY();
+                writer.println(String.valueOf(YClient));
+                getMasterKey(reader, writer);
+            } else {
+                writer.println("ERROR");
+            }
+        }else{
+            System.out.println("Error de reto");
             writer.println("ERROR");
         }
         endCommunication(writer);
