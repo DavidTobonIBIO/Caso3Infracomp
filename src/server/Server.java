@@ -21,7 +21,6 @@ import symmetric.Symmetric;
 public class Server {
 
     private static final int PORT = 3400;
-    private static final int MAX_CLIENTS = 8;
 
     private boolean continueFlag = true;
     private int nThreads;
