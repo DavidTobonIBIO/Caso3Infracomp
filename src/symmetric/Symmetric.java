@@ -164,7 +164,7 @@ public class Symmetric {
             if (algorithm.equals("AES")) {
                 Cipher cipher = Cipher.getInstance(PADDING);
     
-                byte[] combined = msg.getBytes();
+                byte[] combined = Base64.getDecoder().decode(msg);
     
                 // Extraer iv que son los primeros 16 bytes
                 byte[] ivBytes = new byte[16];
@@ -182,8 +182,8 @@ public class Symmetric {
                 cipher.init(Cipher.DECRYPT_MODE, key, iv);
     
                 byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
-                System.out.println("Mensaje descifrado: " + Base64.getEncoder().encodeToString(decryptedBytes));
-                return Base64.getEncoder().encodeToString(decryptedBytes);
+                String decryptedString = new String(decryptedBytes, "UTF-8");
+                return decryptedString;
             }
         } catch (Exception e) {
             System.out.println("Error al descifrar mensaje");
@@ -198,7 +198,7 @@ public class Symmetric {
         try {
             mac = Mac.getInstance("HmacSHA384");
             mac.init(key);
-            byte[] hmacBytes = mac.doFinal(clientId.getBytes());
+            byte[] hmacBytes = mac.doFinal(Base64.getEncoder().encode(clientId.getBytes()));
             return Base64.getEncoder().encodeToString(hmacBytes);
         } catch (InvalidKeyException | NoSuchAlgorithmException e) {
             System.out.println("Error al generar HMAC");

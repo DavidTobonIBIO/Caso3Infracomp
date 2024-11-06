@@ -141,15 +141,12 @@ public class ServerProtocol {
             String hmacClientIdGen = Symmetric.generateHMAC(K_AB2, decryptedClientId);
             String hmacPackageIdGen = Symmetric.generateHMAC(K_AB2, decryptedPackageId);
 
-            String decryptedHmacClientId = Base64.getEncoder().encodeToString(hmacClientId.getBytes());
-            String decryptedHmacPackageId = Base64.getEncoder().encodeToString(hmacPackageId.getBytes());
-
-            if (decryptedHmacClientId.equals(hmacClientIdGen) && decryptedHmacPackageId.equals(hmacPackageIdGen)) {
+            if (hmacClientId.equals(hmacClientIdGen) && hmacPackageId.equals(hmacPackageIdGen)) {
                 System.out.println("HMACs verificados");
-                writer.write("OK");
+                writer.println("OK");
             } else {
                 System.out.println("HMACs no verificados");
-                writer.write("ERROR");
+                writer.println("ERROR");
             }
 
             inputLine = reader.readLine();
