@@ -15,12 +15,12 @@ public class CSVFIleCreator {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try (PrintWriter writer = new PrintWriter(new FileWriter("query.csv"))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("query_verification.csv"))) {
             writer.println("n_concurrent;time_ns");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try (PrintWriter writer = new PrintWriter(new FileWriter("cipher_pkg_state.csv"))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("pkg_state_cipher.csv"))) {
             writer.println("n_concurrent;is_symmetric;time_ns");
         } catch (IOException e) {
             e.printStackTrace();

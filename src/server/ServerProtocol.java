@@ -72,7 +72,7 @@ public class ServerProtocol {
         try {
             if (numConcurrentClients == 1) {
                 // repetir para obtener replicas de tiempo y hacer promedio si se corre con cliente iterativo
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < 5; i++) {
                     long startTimeNs = System.nanoTime();
                     String[] GP = Symmetric.generatePG(OPEN_SSL_PATH);
                     System.out.println("Llaves simetricas generadas");
@@ -81,9 +81,7 @@ public class ServerProtocol {
                     BigInteger[] YX = Symmetric.generateY(P, G);
                     Y = YX[0];
                     x = YX[1];
-                    long endTimeNs = System.nanoTime();
-                    long timeNs = endTimeNs - startTimeNs;
-                    writeDiffieHellmanGenerationTime(timeNs);
+                    writeDiffieHellmanGenerationTime(System.nanoTime() - startTimeNs);
                 }
             } else {
                 long startTimeNs = System.nanoTime();
@@ -94,9 +92,7 @@ public class ServerProtocol {
                 BigInteger[] YX = Symmetric.generateY(P, G);
                 Y = YX[0];
                 x = YX[1];
-                long endTimeNs = System.nanoTime();
-                long timeNs = endTimeNs - startTimeNs;
-                writeDiffieHellmanGenerationTime(timeNs);
+                writeDiffieHellmanGenerationTime(System.nanoTime() - startTimeNs);
             }
             writer.println(String.valueOf(G));
             writer.println(String.valueOf(P));
@@ -150,16 +146,12 @@ public class ServerProtocol {
             for (int i = 0; i < 32; i++) {
                 long startTimeNs = System.nanoTime();
                 rta = Asymmetric.decipher(privateKey, "RSA", reto);
-                long endTimeNs = System.nanoTime();
-                long timeNs = endTimeNs - startTimeNs;
-                writeRetoDecryptionTime(timeNs);
+                writeRetoDecryptionTime(System.nanoTime() - startTimeNs);
             }
         } else {
             long startTimeNs = System.nanoTime();
             rta = Asymmetric.decipher(privateKey, "RSA", reto);
-            long endTimeNs = System.nanoTime();
-            long timeNs = endTimeNs - startTimeNs;
-            writeRetoDecryptionTime(timeNs);
+            writeRetoDecryptionTime(System.nanoTime() - startTimeNs);
         }
         String encodedK_AB1 = Base64.getEncoder().withoutPadding().encodeToString(rta);;
         System.out.println("rta: " + encodedK_AB1);
@@ -169,44 +161,61 @@ public class ServerProtocol {
     public static String getPackageQuery(BufferedReader reader, PrintWriter writer) throws IOException {
         String inputLine = reader.readLine();
         while (!inputLine.equals("TERMINAR")) {
-            String encryptedClientId = inputLine;
-            String hmacClientId = reader.readLine();
-            String encryptedPackageId = reader.readLine();
-            String hmacPackageId = reader.readLine();
-
-            System.out.println("C(K_AB1, uid): " + encryptedClientId);
-            System.out.println("HMAC(K_AB2, uid): " + hmacClientId);
-            System.out.println("C(K_AB1, paquete_id): " + encryptedPackageId);
-            System.out.println("HMAC(K_AB2, paquete_id): " + hmacPackageId);
-
-            String decryptedClientId = Symmetric.decipher(K_AB1, "AES", encryptedClientId);
-            String decryptedPackageId = Symmetric.decipher(K_AB1, "AES", encryptedPackageId);
-
-            System.out.println("uid: " + decryptedClientId);
-            System.out.println("paquete_id: " + decryptedPackageId);
-
-            String hmacClientIdGen = Symmetric.generateHMAC(K_AB2, decryptedClientId);
-            String hmacPackageIdGen = Symmetric.generateHMAC(K_AB2, decryptedPackageId);
-
-            if (hmacClientId.equals(hmacClientIdGen) && hmacPackageId.equals(hmacPackageIdGen)) {
-                System.out.println("HMACs verificados");
-                writer.println("OK");
-                sendPackageState(decryptedClientId, decryptedPackageId, writer);
-            } else {
-                System.out.println("HMACs no verificados");
-                writer.println("ERROR");
-            }
+           
+            verifyQuery(inputLine, reader, writer);
 
             inputLine = reader.readLine();
         }
         return inputLine;
     }
 
+    private static void verifyQuery(String inputLine, BufferedReader reader, PrintWriter writer) throws IOException {
+        long startTimeNs = System.nanoTime();
+
+        String encryptedClientId = inputLine;
+        String hmacClientId = reader.readLine();
+        String encryptedPackageId = reader.readLine();
+        String hmacPackageId = reader.readLine();
+
+        System.out.println("C(K_AB1, uid): " + encryptedClientId);
+        System.out.println("HMAC(K_AB2, uid): " + hmacClientId);
+        System.out.println("C(K_AB1, paquete_id): " + encryptedPackageId);
+        System.out.println("HMAC(K_AB2, paquete_id): " + hmacPackageId);
+
+        String decryptedClientId = Symmetric.decipher(K_AB1, "AES", encryptedClientId);
+        String decryptedPackageId = Symmetric.decipher(K_AB1, "AES", encryptedPackageId);
+
+        System.out.println("uid: " + decryptedClientId);
+        System.out.println("paquete_id: " + decryptedPackageId);
+
+        String hmacClientIdGen = Symmetric.generateHMAC(K_AB2, decryptedClientId);
+        String hmacPackageIdGen = Symmetric.generateHMAC(K_AB2, decryptedPackageId);
+
+        if (hmacClientId.equals(hmacClientIdGen) && hmacPackageId.equals(hmacPackageIdGen)) {
+            System.out.println("HMACs verificados");
+            writer.println("OK");
+            sendPackageState(decryptedClientId, decryptedPackageId, writer);
+        } else {
+            System.out.println("HMACs no verificados");
+            writer.println("ERROR");
+        }
+        writeQueryVerificationTime(System.nanoTime() - startTimeNs);
+    }
+
     private static void sendPackageState(String clientId, String packageId, PrintWriter writer) {
         PackageState pkg = packageTable.getPackageState(Integer.parseInt(clientId), Integer.parseInt(packageId));
         String pkgState = String.valueOf(pkg.getCode());
         System.out.println("Estado del paquete: " + pkgState);
+
+        long startTimeNs = System.nanoTime();
         String encryptedState = Symmetric.cipher(K_AB1, "AES", pkgState);
+        writePackageStateCipherTime(System.nanoTime() - startTimeNs, true);
+
+        // tomar tiempo solo para comparar, no es parte del protocolo
+        startTimeNs = System.nanoTime();
+        Asymmetric.cipher(getPrivateKey(), "RSA", Base64.getEncoder().encodeToString(pkgState.getBytes()));
+        writePackageStateCipherTime(System.nanoTime() - startTimeNs, false);
+
         String hmacState = Symmetric.generateHMAC(K_AB2, pkgState);
         System.out.println("C(K_AB1, " + pkgState + "): " + encryptedState);
         System.out.println("HMAC(K_AB2, " + pkgState + "): " + hmacState);
@@ -237,7 +246,35 @@ public class ServerProtocol {
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }   
+    }
+
+    private static void writeQueryVerificationTime(long tomeNs) {
+        try {
+            FileWriter writer = new FileWriter("query_verification.csv", true);
+            writer.append(String.valueOf(numConcurrentClients));
+            writer.append(";");
+            writer.append(String.valueOf(tomeNs));
+            writer.append("\n");
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        
+    }
+
+    private static void writePackageStateCipherTime(long timeNs, boolean isSymmetric) {
+        try {
+            FileWriter writer = new FileWriter("pkg_state_cipher.csv", true);
+            writer.append(String.valueOf(numConcurrentClients));
+            writer.append(";");
+            int isSymmetricInt = isSymmetric ? 1 : 0;
+            writer.append(String.valueOf(isSymmetricInt));
+            writer.append(";");
+            writer.append(String.valueOf(timeNs));
+            writer.append("\n");
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
