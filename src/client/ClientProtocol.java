@@ -210,7 +210,7 @@ public class ClientProtocol {
         String decryptedPackageState = Symmetric.decipher(K_AB1, "AES", encryptedPackageState);
         int packageStateCode = Integer.parseInt(decryptedPackageState);
         PackageState packageState = PackageState.fromCode(packageStateCode);
-        String packageStateName = packageState.getDisplayName();
+        String packageStateName = packageState.getStateName();
         System.out.println("estado: " + packageStateName);
 
         String hmacPackageStateGen = Symmetric.generateHMAC(K_AB2, decryptedPackageState);

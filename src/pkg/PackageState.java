@@ -21,14 +21,14 @@ public enum PackageState {
         return code;
     }
 
-    public String getDisplayName() {
+    public String getStateName() {
         return displayName;
     }
 
     public static PackageState fromCode(int code) {
-        for (PackageState status : PackageState.values()) {
-            if (status.getCode() == code) {
-                return status;
+        for (PackageState state : PackageState.values()) {
+            if (state.getCode() == code) {
+                return state;
             }
         }
         return DESCONOCIDO;

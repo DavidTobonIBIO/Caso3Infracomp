@@ -4,12 +4,12 @@ public class Package {
 
     private int clientId;
     private int packageId;
-    private PackageState status;
+    private PackageState state;
 
-    public Package(int clientId, int packageId, PackageState status) {
+    public Package(int clientId, int packageId, PackageState state) {
         this.clientId = clientId;
         this.packageId = packageId;
-        this.status = status;
+        this.state = state;
     }
 
     public int getClientId() {
@@ -20,15 +20,15 @@ public class Package {
         return packageId;
     }
 
-    public PackageState getStatus() {
-        return status;
+    public PackageState getState() {
+        return state;
     }
 
-    public void setStatus(PackageState status) {
-        this.status = status;
+    public void setState(PackageState state) {
+        this.state = state;
     }
 
-    public String getStatusDisplayName() {
-        return status.getDisplayName();
+    public String getStateName() {
+        return state.getStateName();
     }
 }

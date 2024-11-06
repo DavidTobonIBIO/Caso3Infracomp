@@ -20,7 +20,7 @@ public class PackageTable {
         for (int i = 0; i < NUM_PACKAGES; i++) {
             int clientId = i;
             int packageId = i;
-            Package pkg = new Package(clientId, packageId, getRandomStatus());
+            Package pkg = new Package(clientId, packageId, getRandomState());
             packageMap.put(generateKey(clientId, packageId), pkg);
         }
     }
@@ -29,13 +29,13 @@ public class PackageTable {
         return "client:" + clientId + "|package:" + packageId;
     }
 
-    private PackageState getRandomStatus() {
-        PackageState[] statuses = PackageState.values();
-        return statuses[random.nextInt(statuses.length - 1)];
+    private PackageState getRandomState() {
+        PackageState[] states = PackageState.values();
+        return states[random.nextInt(states.length - 1)];
     }
 
-    public PackageState getPackageStatus(int clientId, int packageId) {
+    public PackageState getPackageState(int clientId, int packageId) {
         Package pkg = packageMap.get(generateKey(clientId, packageId));
-        return (pkg != null) ? pkg.getStatus() : PackageState.DESCONOCIDO;
+        return (pkg != null) ? pkg.getState() : PackageState.DESCONOCIDO;
     }
 }

@@ -161,14 +161,14 @@ public class ServerProtocol {
     }
 
     private static void sendPackageState(String clientId, String packageId, PrintWriter writer) {
-        PackageState pkg = packageTable.getPackageStatus(Integer.parseInt(clientId), Integer.parseInt(packageId));
-        String status = String.valueOf(pkg.getCode());
-        System.out.println("Estado del paquete: " + status);
-        String encryptedStatus = Symmetric.cipher(K_AB1, "AES", status);
-        String hmacStatus = Symmetric.generateHMAC(K_AB2, status);
-        System.out.println("C(K_AB1, " + status + "): " + encryptedStatus);
-        System.out.println("HMAC(K_AB2, " + status + "): " + hmacStatus);
-        writer.println(encryptedStatus);
-        writer.println(hmacStatus);
+        PackageState pkg = packageTable.getPackageState(Integer.parseInt(clientId), Integer.parseInt(packageId));
+        String pkgState = String.valueOf(pkg.getCode());
+        System.out.println("Estado del paquete: " + pkgState);
+        String encryptedState = Symmetric.cipher(K_AB1, "AES", pkgState);
+        String hmacState = Symmetric.generateHMAC(K_AB2, pkgState);
+        System.out.println("C(K_AB1, " + pkgState + "): " + encryptedState);
+        System.out.println("HMAC(K_AB2, " + pkgState + "): " + hmacState);
+        writer.println(encryptedState);
+        writer.println(hmacState);
     }
 }
