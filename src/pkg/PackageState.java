@@ -1,6 +1,6 @@
 package pkg;
 
-public enum PackageStatus {
+public enum PackageState {
     ENOFICINA(0, "ENOFICINA"),
     RECOGIDO(1, "RECOGIDO"),
     ENCLASIFICACION(2, "ENCLASIFICACION"),
@@ -12,7 +12,7 @@ public enum PackageStatus {
     private final int code;
     private final String displayName;
 
-    PackageStatus(int code, String displayName) {
+    PackageState(int code, String displayName) {
         this.code = code;
         this.displayName = displayName;
     }
@@ -25,8 +25,8 @@ public enum PackageStatus {
         return displayName;
     }
 
-    public static PackageStatus fromCode(int code) {
-        for (PackageStatus status : PackageStatus.values()) {
+    public static PackageState fromCode(int code) {
+        for (PackageState status : PackageState.values()) {
             if (status.getCode() == code) {
                 return status;
             }

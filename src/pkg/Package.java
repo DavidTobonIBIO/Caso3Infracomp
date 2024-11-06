@@ -2,29 +2,29 @@ package pkg;
 
 public class Package {
 
-    private String clientId;
-    private String packageId;
-    private PackageStatus status;
+    private int clientId;
+    private int packageId;
+    private PackageState status;
 
-    public Package(String clientId, String packageId, PackageStatus status) {
+    public Package(int clientId, int packageId, PackageState status) {
         this.clientId = clientId;
         this.packageId = packageId;
         this.status = status;
     }
 
-    public String getClientId() {
+    public int getClientId() {
         return clientId;
     }
 
-    public String getPackageId() {
+    public int getPackageId() {
         return packageId;
     }
 
-    public PackageStatus getStatus() {
+    public PackageState getStatus() {
         return status;
     }
 
-    public void setStatus(PackageStatus status) {
+    public void setStatus(PackageState status) {
         this.status = status;
     }
 

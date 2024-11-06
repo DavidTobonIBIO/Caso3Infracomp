@@ -16,6 +16,8 @@ import javax.crypto.SecretKey;
 import SHA.SHA1RSA;
 import SHA.SHA512;
 import asymmetric.Asymmetric;
+import pkg.PackageState;
+import pkg.PackageTable;
 import symmetric.Symmetric;
 
 public class ServerProtocol {
@@ -28,6 +30,8 @@ public class ServerProtocol {
     private static final String OPEN_SSL_PATH = "OpenSSL-1.1.1h_win32";
     private static SecretKey K_AB1;
     private static SecretKey K_AB2;
+    private static PackageTable packageTable = new PackageTable();
+
 
     public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException,
             NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
@@ -146,6 +150,7 @@ public class ServerProtocol {
             if (hmacClientId.equals(hmacClientIdGen) && hmacPackageId.equals(hmacPackageIdGen)) {
                 System.out.println("HMACs verificados");
                 writer.println("OK");
+                sendPackageState(decryptedClientId, decryptedPackageId, writer);
             } else {
                 System.out.println("HMACs no verificados");
                 writer.println("ERROR");
@@ -154,5 +159,17 @@ public class ServerProtocol {
             inputLine = reader.readLine();
         }
         return inputLine;
+    }
+
+    private static void sendPackageState(String clientId, String packageId, PrintWriter writer) {
+        PackageState pkg = packageTable.getPackageStatus(Integer.parseInt(clientId), Integer.parseInt(packageId));
+        String status = String.valueOf(pkg.getCode());
+        System.out.println("Estado del paquete: " + status);
+        String encryptedStatus = Symmetric.cipher(K_AB1, "AES", status);
+        String hmacStatus = Symmetric.generateHMAC(K_AB2, status);
+        System.out.println("C(K_AB1, " + status + "): " + encryptedStatus);
+        System.out.println("HMAC(K_AB2, " + status + "): " + hmacStatus);
+        writer.println(encryptedStatus);
+        writer.println(hmacStatus);
     }
 }

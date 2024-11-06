@@ -17,6 +17,7 @@ import javax.crypto.SecretKey;
 import SHA.SHA1RSA;
 import SHA.SHA512;
 import asymmetric.Asymmetric;
+import pkg.PackageState;
 import symmetric.Symmetric;
 import java.math.BigInteger;
 
@@ -64,9 +65,9 @@ public class ClientProtocol {
         try {
             if (algorithm.equals("RSA")) {
                 publicKey = Asymmetric.loadPublicKey(algorithm);
-            } 
+            }
             // else if (algorithm.equals("AES")) {
-            //     symmetricKey = Symmetric.loadKey(algorithm);
+            // symmetricKey = Symmetric.loadKey(algorithm);
             // }
         } catch (Exception e) {
             System.out.println("Error al cargar las llaves");
@@ -207,8 +208,24 @@ public class ClientProtocol {
         return encryptedClientId;
     }
 
-    private void decryptPackageState() {
-        // TODO: cipher package state
+    private void decryptPackageState(BufferedReader reader) throws IOException {
+        String encryptedPackageState = reader.readLine();
+        String hmacPackageState = reader.readLine();
+        System.out.println("C(K_AB1, estado): " + encryptedPackageState);
+        System.out.println("HMAC(K_AB2, estado): " + hmacPackageState);
+
+        String decryptedPackageState = Symmetric.decipher(K_AB1, "AES", encryptedPackageState);
+        int packageStateCode = Integer.parseInt(decryptedPackageState);
+        PackageState packageState = PackageState.fromCode(packageStateCode);
+        String packageStateName = packageState.getDisplayName();
+        System.out.println("estado: " + packageStateName);
+
+        String hmacPackageStateGen = Symmetric.generateHMAC(K_AB2, decryptedPackageState);
+        if (hmacPackageState.equals(hmacPackageStateGen)) {
+            System.out.println("HMAC verificado");
+        } else {
+            System.out.println("HMAC no verificado");
+        }
     }
 
     private String generateHMAC(int id) {
@@ -222,12 +239,12 @@ public class ClientProtocol {
         String hmacClientId = generateHMAC(client.getClientId());
         String encryptedPackageId = symmetricCipher(client.getPackageId());
         String hmacPackageId = generateHMAC(client.getPackageId());
-        
+
         System.out.println("C(K_AB1, " + client.getClientId() + "): " + encryptedClientId);
         System.out.println("HMAC(K_AB2, " + client.getClientId() + "): " + hmacClientId);
         System.out.println("C(K_AB1, " + client.getPackageId() + "): " + encryptedPackageId);
         System.out.println("HMAC(K_AB2, " + client.getPackageId() + "): " + hmacPackageId);
-        
+
         writer.println(encryptedClientId);
         writer.println(hmacClientId);
         writer.println(encryptedPackageId);
@@ -235,7 +252,8 @@ public class ClientProtocol {
 
         String serverAnswer = reader.readLine();
         System.out.println("Server: " + serverAnswer);
-
+        if (serverAnswer.equals("OK")) {
+            decryptPackageState(reader);
+        }
     }
-
 }
