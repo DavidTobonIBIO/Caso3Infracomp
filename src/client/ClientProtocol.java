@@ -85,7 +85,7 @@ public class ClientProtocol {
         BigInteger rtaBig = new BigInteger(rtaDecode); 
         System.out.println("reto: " + reto.toString());
         System.out.println("rta: " + rtaBig.toString());
-        // TODO: verificar igualdad de respuesta al reto
+        
         if (reto.compareTo(rtaBig) == 0){
             writer.println("OK");
             byte[] firma = diffie(writer, reader);
@@ -129,10 +129,19 @@ public class ClientProtocol {
             byte[] firma = diffie(writer, reader);
             boolean check = checkSignature(firma);
             if (check) {
+                System.out.println("Firma verificada");
                 writer.println("OK");
                 createY();
                 writer.println(String.valueOf(YClient));
                 getMasterKey(reader, writer);
+                Random rand = new Random();
+                int i = rand.nextInt(31);
+                i = i +1;
+                System.out.println("Iteracion " + i);
+                client.setClientId(i);
+                client.setPackageId(i);
+                executePackgeRequest(reader, writer);
+                writer.println("TERMINAR");
             } else {
                 writer.println("ERROR");
             }
