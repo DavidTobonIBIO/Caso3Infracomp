@@ -97,8 +97,8 @@ public class Asymmetric {
 
     public static byte[] decipher(Key key, String algorithm, String msg) {
         byte[] decryptedMsg = null;
-        byte[] msgBytes = Base64.getDecoder().decode(msg.trim());
-        //byte[] msgBytes = msg.getBytes();
+        byte[] msgBytes = Base64.getDecoder().decode(msg);
+
         try {
             Cipher cipher = Cipher.getInstance(algorithm);
             cipher.init(Cipher.DECRYPT_MODE, key);

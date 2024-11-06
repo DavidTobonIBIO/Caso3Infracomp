@@ -87,8 +87,6 @@ public class ClientProtocol {
         String rtaReto = reader.readLine();
         System.out.println("rta" + rtaReto);
         System.out.println("reto" + String.valueOf(reto));
-        //BigInteger rr = new BigInteger(rtaReto);
-        //rtaReto = String.valueOf(rr);
         System.out.println(rtaReto);
         if (String.valueOf(reto).equals(rtaReto)){
             System.out.println("Reto correcto");
@@ -195,7 +193,6 @@ public class ClientProtocol {
     public void cipherReto(PrintWriter writer) throws UnsupportedEncodingException {
         String retoString = String.valueOf(reto);
         byte[] encryptedReto = Asymmetric.cipher(publicKey, "RSA", retoString);
-        //System.out.println("Cifrado: " + String.valueOf(encryptedReto));
         String encryptedRetoString = Base64.getEncoder().withoutPadding().encodeToString(encryptedReto);
         //String encryptedRetoString = new String(encryptedReto, "UTF-8");
         writer.println(encryptedRetoString);
