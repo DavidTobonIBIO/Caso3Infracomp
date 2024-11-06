@@ -1,6 +1,7 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
@@ -31,7 +32,11 @@ public class ServerProtocol {
     private static SecretKey K_AB1;
     private static SecretKey K_AB2;
     private static PackageTable packageTable = new PackageTable();
+    private static int numConcurrentClients = 0;
 
+    public static void setNumConcurrentClients(int n) {
+        numConcurrentClients = n;
+    }
 
     public static boolean execute(BufferedReader reader, PrintWriter writer) throws IOException, InvalidKeyException,
             NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
@@ -65,15 +70,36 @@ public class ServerProtocol {
     private static void diffieHellman(PrintWriter writer)
             throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         try {
-            String[] GP = Symmetric.generatePG(OPEN_SSL_PATH);
-            System.out.println("Llaves simetricas generadas");
-            G = Integer.parseInt(GP[1]);
-            P = Symmetric.parser(GP[0]);
+            if (numConcurrentClients == 1) {
+                // repetir para obtener replicas de tiempo y hacer promedio si se corre con cliente iterativo
+                for (int i = 0; i < 10; i++) {
+                    long startTimeNs = System.nanoTime();
+                    String[] GP = Symmetric.generatePG(OPEN_SSL_PATH);
+                    System.out.println("Llaves simetricas generadas");
+                    G = Integer.parseInt(GP[1]);
+                    P = Symmetric.parser(GP[0]);
+                    BigInteger[] YX = Symmetric.generateY(P, G);
+                    Y = YX[0];
+                    x = YX[1];
+                    long endTimeNs = System.nanoTime();
+                    long timeNs = endTimeNs - startTimeNs;
+                    writeDiffieHellmanGenerationTime(timeNs);
+                }
+            } else {
+                long startTimeNs = System.nanoTime();
+                String[] GP = Symmetric.generatePG(OPEN_SSL_PATH);
+                System.out.println("Llaves simetricas generadas");
+                G = Integer.parseInt(GP[1]);
+                P = Symmetric.parser(GP[0]);
+                BigInteger[] YX = Symmetric.generateY(P, G);
+                Y = YX[0];
+                x = YX[1];
+                long endTimeNs = System.nanoTime();
+                long timeNs = endTimeNs - startTimeNs;
+                writeDiffieHellmanGenerationTime(timeNs);
+            }
             writer.println(String.valueOf(G));
             writer.println(String.valueOf(P));
-            BigInteger[] YX = Symmetric.generateY(P, G);
-            Y = YX[0];
-            x = YX[1];
             writer.println(String.valueOf(Y));
             sign(P, Y, G, writer);
 
@@ -118,7 +144,23 @@ public class ServerProtocol {
         String reto = reader.readLine();
         System.out.println(reto);
         PrivateKey privateKey = getPrivateKey();
-        byte[] rta = Asymmetric.decipher(privateKey, "RSA", reto);
+        byte[] rta = null;
+        // Repetir decifrado para obtener replicas de tiempo y hacer promedio si se corre con cliente iterativo
+        if (numConcurrentClients == 1) {
+            for (int i = 0; i < 32; i++) {
+                long startTimeNs = System.nanoTime();
+                rta = Asymmetric.decipher(privateKey, "RSA", reto);
+                long endTimeNs = System.nanoTime();
+                long timeNs = endTimeNs - startTimeNs;
+                writeRetoDecryptionTime(timeNs);
+            }
+        } else {
+            long startTimeNs = System.nanoTime();
+            rta = Asymmetric.decipher(privateKey, "RSA", reto);
+            long endTimeNs = System.nanoTime();
+            long timeNs = endTimeNs - startTimeNs;
+            writeRetoDecryptionTime(timeNs);
+        }
         String encodedK_AB1 = Base64.getEncoder().withoutPadding().encodeToString(rta);;
         System.out.println("rta: " + encodedK_AB1);
         writer.println(encodedK_AB1);
@@ -170,5 +212,32 @@ public class ServerProtocol {
         System.out.println("HMAC(K_AB2, " + pkgState + "): " + hmacState);
         writer.println(encryptedState);
         writer.println(hmacState);
+    }
+
+    private static void writeRetoDecryptionTime(long timeNs) {
+        try {
+            FileWriter writer = new FileWriter("reto.csv", true);
+            writer.append(String.valueOf(numConcurrentClients));
+            writer.append(";");
+            writer.append(String.valueOf(timeNs));
+            writer.append("\n");
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void writeDiffieHellmanGenerationTime(long timeNs) {
+        try {
+            FileWriter writer = new FileWriter("diffie_hellman.csv", true);
+            writer.append(String.valueOf(numConcurrentClients));
+            writer.append(";");
+            writer.append(String.valueOf(timeNs));
+            writer.append("\n");
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
     }
 }

@@ -48,6 +48,7 @@ public class Server {
                                 "Ingrese el numero de delegados concurrentes (1 para proceso iterativo, 4, 8, 32):");
                         nThreads = scanner.nextInt();
                         if (nThreads > 0) {
+                            ServerProtocol.setNumConcurrentClients(nThreads);
                             check = false;
                             launch();
                         } else {
