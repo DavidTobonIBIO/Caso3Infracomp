@@ -91,12 +91,12 @@ public class ClientProtocol {
             writer.println("OK");
             createY();
             writer.println(String.valueOf(YClient));
-            getMasterKey(writer, reader);
+            getMasterKey(reader, writer);
             for (int i = 1; i <= NUM_ITERATIONS; i++) {
                 System.out.println("Iteracion " + i);
                 client.setClientId(i);
                 client.setPackageId(i);
-                executePackgeRequest(writer);
+                executePackgeRequest(reader, writer);
             }
             writer.println("TERMINAR");
 
@@ -117,7 +117,7 @@ public class ClientProtocol {
             writer.println("OK");
             createY();
             writer.println(String.valueOf(YClient));
-            getMasterKey(writer, reader);
+            getMasterKey(reader, writer);
         } else {
             writer.println("ERROR");
         }
@@ -150,7 +150,7 @@ public class ClientProtocol {
         return check;
     }
 
-    public void getMasterKey(PrintWriter writer, BufferedReader reader)
+    public void getMasterKey(BufferedReader reader, PrintWriter writer)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         BigInteger YServer = new BigInteger(Y);
         BigInteger master = YServer.modPow(x, new BigInteger(P));
@@ -170,17 +170,17 @@ public class ClientProtocol {
     }
 
     public void cipherReto(PrintWriter writer) {
-        String retoString = String.valueOf(reto);
+        String retoString = reto.toString();
         byte[] encryptedReto = Asymmetric.cipher(publicKey, "RSA", retoString);
-        System.out.println("Cifrado: " + String.valueOf(encryptedReto));
+        System.out.println("Reto Cifrado: " + Base64.getEncoder().encodeToString(encryptedReto));
         String encryptedRetoString = Base64.getEncoder().encodeToString(encryptedReto);
         writer.println(encryptedRetoString);
     }
 
     private String symmetricCipher(int id) {
         String idString = String.valueOf(id);
-        byte[] encryptedClientId = Symmetric.cipher(K_AB1, "AES", idString);
-        return Base64.getEncoder().encodeToString(encryptedClientId);
+        String encryptedClientId = Symmetric.cipher(K_AB1, "AES", idString);
+        return encryptedClientId;
     }
 
     private void decryptPackageState() {
@@ -189,25 +189,28 @@ public class ClientProtocol {
 
     private String generateHMAC(int id) {
         String idString = String.valueOf(id);
-        byte[] hmacClientId = Symmetric.generateHMAC(K_AB2, idString);
-        return Base64.getEncoder().encodeToString(hmacClientId);
+        String hmacClientId = Symmetric.generateHMAC(K_AB2, idString);
+        return hmacClientId;
     }
 
-    private void executePackgeRequest(PrintWriter writer) {
+    private void executePackgeRequest(BufferedReader reader, PrintWriter writer) throws IOException {
         String encryptedClientId = symmetricCipher(client.getClientId());
         String hmacClientId = generateHMAC(client.getClientId());
         String encryptedPackageId = symmetricCipher(client.getPackageId());
         String hmacPackageId = generateHMAC(client.getPackageId());
         
-        System.out.println("C(K_AB1, uid): " + encryptedClientId);
-        System.out.println("HMAC(K_AB2, uid): " + hmacClientId);
-        System.out.println("C(K_AB1, paquete_id): " + encryptedPackageId);
-        System.out.println("HMAC(K_AB2, paquete_id): " + hmacPackageId);
+        System.out.println("C(K_AB1, " + client.getClientId() + "): " + encryptedClientId);
+        System.out.println("HMAC(K_AB2, " + client.getClientId() + "): " + hmacClientId);
+        System.out.println("C(K_AB1, " + client.getPackageId() + "): " + encryptedPackageId);
+        System.out.println("HMAC(K_AB2, " + client.getPackageId() + "): " + hmacPackageId);
         
         writer.println(encryptedClientId);
         writer.println(hmacClientId);
         writer.println(encryptedPackageId);
         writer.println(hmacPackageId);
+
+        String serverAnswer = reader.readLine();
+        System.out.println("Server: " + serverAnswer);
 
     }
 
