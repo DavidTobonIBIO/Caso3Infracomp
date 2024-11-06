@@ -98,7 +98,7 @@ public class ClientProtocol {
                     System.out.println("Iteracion " + i);
                     client.setClientId(i);
                     client.setPackageId(i);
-                    executePackgeRequest(reader, writer);
+                    executePackgeQuery(reader, writer);
                 }
             } else {
                 System.out.println("Falla en la verificacion de la firma");
@@ -130,7 +130,7 @@ public class ClientProtocol {
                 createY();
                 writer.println(String.valueOf(YClient));
                 getMasterKey(reader, writer);
-                executePackgeRequest(reader, writer);
+                executePackgeQuery(reader, writer);
             } else {
                 writer.println("ERROR");
             }
@@ -227,7 +227,7 @@ public class ClientProtocol {
         return hmacClientId;
     }
 
-    private void executePackgeRequest(BufferedReader reader, PrintWriter writer) throws IOException {
+    private void executePackgeQuery(BufferedReader reader, PrintWriter writer) throws IOException {
         String encryptedClientId = symmetricCipher(client.getClientId());
         String hmacClientId = generateHMAC(client.getClientId());
         String encryptedPackageId = symmetricCipher(client.getPackageId());

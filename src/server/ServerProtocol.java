@@ -47,7 +47,7 @@ public class ServerProtocol {
                 if (inputLine.equals("OK")) {
                     System.out.println("Cliente ha verificado la firma");
                     getMasterKey(writer, reader);
-                    inputLine = getPackageRequest(reader, writer);
+                    inputLine = getPackageQuery(reader, writer);
                     if (inputLine.equals("TERMINAR")) {
                         System.out.println("Cliente ha solicitado desconexion.");
                         writer.println("Desconexion exitosa");
@@ -124,7 +124,7 @@ public class ServerProtocol {
         writer.println(encodedK_AB1);
     }
 
-    public static String getPackageRequest(BufferedReader reader, PrintWriter writer) throws IOException {
+    public static String getPackageQuery(BufferedReader reader, PrintWriter writer) throws IOException {
         String inputLine = reader.readLine();
         while (!inputLine.equals("TERMINAR")) {
             String encryptedClientId = inputLine;
