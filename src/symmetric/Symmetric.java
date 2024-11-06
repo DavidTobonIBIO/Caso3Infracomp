@@ -22,6 +22,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import pkg.PackageTable;
+
 public class Symmetric {
 
     private static final String KEY_FILE_PATH = "keys/symmetric.key";

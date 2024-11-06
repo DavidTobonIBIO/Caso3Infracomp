@@ -18,31 +18,24 @@ public class PackageTable {
 
     private void initializePackages() {
         for (int i = 0; i < NUM_PACKAGES; i++) {
-            String clientId = "client:" + i;
-            String packageId = "package:" + i;
+            int clientId = i;
+            int packageId = i;
             Package pkg = new Package(clientId, packageId, getRandomStatus());
             packageMap.put(generateKey(clientId, packageId), pkg);
         }
     }
 
-    private String generateKey(String clientId, String packageId) {
-        return clientId + "|" + packageId;
+    private String generateKey(int clientId, int packageId) {
+        return "client:" + clientId + "|package:" + packageId;
     }
 
-    private PackageStatus getRandomStatus() {
-        PackageStatus[] statuses = PackageStatus.values();
+    private PackageState getRandomStatus() {
+        PackageState[] statuses = PackageState.values();
         return statuses[random.nextInt(statuses.length - 1)];
     }
 
-    public PackageStatus getPackageStatus(String clientId, String packageId) {
+    public PackageState getPackageStatus(int clientId, int packageId) {
         Package pkg = packageMap.get(generateKey(clientId, packageId));
-        return (pkg != null) ? pkg.getStatus() : PackageStatus.DESCONOCIDO;
-    }
-
-    public void updatePackageStatus(String clientId, String packageId, PackageStatus newStatus) {
-        Package pkg = packageMap.get(generateKey(clientId, packageId));
-        if (pkg != null) {
-            pkg.setStatus(newStatus);
-        }
+        return (pkg != null) ? pkg.getStatus() : PackageState.DESCONOCIDO;
     }
 }
