@@ -83,28 +83,33 @@ public class ClientProtocol {
         writer.println("SECINIT");
         generateReto();
         cipherReto(writer);
+        String rta = reader.readLine();
+        System.out.println("rta: " + rta);
+        byte[] rtaDecode = Base64.getDecoder().decode(rta);
+        BigInteger rtaBig = new BigInteger(rtaDecode); 
         // TODO: verificar igualdad de respuesta al reto
-        writer.println("OK");
-        byte[] firma = diffie(writer, reader);
-        boolean check = checkSignature(firma);
-        if (check) {
-            System.out.println("Firma verificada");
+        if (reto.compareTo(rtaBig) == 0){
             writer.println("OK");
-            createY();
-            writer.println(String.valueOf(YClient));
-            getMasterKey(reader, writer);
-            for (int i = 1; i <= NUM_ITERATIONS; i++) {
-                System.out.println("Iteracion " + i);
-                client.setClientId(i);
-                client.setPackageId(i);
-                executePackgeRequest(reader, writer);
-            }
-            writer.println("TERMINAR");
+            byte[] firma = diffie(writer, reader);
+            boolean check = checkSignature(firma);
+            if (check) {
+                System.out.println("Firma verificada");
+                writer.println("OK");
+                createY();
+                writer.println(String.valueOf(YClient));
+                getMasterKey(reader, writer);
+                for (int i = 1; i <= NUM_ITERATIONS; i++) {
+                    System.out.println("Iteracion " + i);
+                    client.setClientId(i);
+                    client.setPackageId(i);
+                    executePackgeRequest(reader, writer);
+                }
+                writer.println("TERMINAR");
 
-            } else {
-                System.out.println("Falla en la verificacion de la firma");
-                writer.println("ERROR");
-            }
+                } else {
+                    System.out.println("Falla en la verificacion de la firma");
+                    writer.println("ERROR");
+                }
         }else{
             System.out.println("Error de reto");
             writer.println("ERROR");
@@ -174,12 +179,13 @@ public class ClientProtocol {
     }
 
     public void cipherReto(PrintWriter writer) {
-        String retoString = reto.toString();
+        String retoString = Base64.getEncoder().encodeToString(reto.toByteArray());
+        System.out.println(retoString);
         byte[] encryptedReto = Asymmetric.cipher(publicKey, "RSA", retoString);
         System.out.println("Reto Cifrado: " + Base64.getEncoder().encodeToString(encryptedReto));
         String encryptedRetoString = Base64.getEncoder().encodeToString(encryptedReto);
         writer.println(encryptedRetoString);
-        System.out.println("cypher" + encryptedRetoString);
+        //System.out.println("cypher" + encryptedRetoString);
     }
 
     private String symmetricCipher(int id) {

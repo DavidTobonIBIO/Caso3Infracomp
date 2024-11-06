@@ -117,7 +117,7 @@ public class ServerProtocol {
         PrivateKey privateKey = getPrivateKey();
         byte[] rta = Asymmetric.decipher(privateKey, "RSA", reto);
         String encodedK_AB1 = Base64.getEncoder().withoutPadding().encodeToString(rta);;
-        System.out.println(encodedK_AB1);
+        System.out.println("rta: " + encodedK_AB1);
         writer.println(encodedK_AB1);
     }
 
