@@ -184,8 +184,24 @@ public class ClientProtocol {
         return encryptedClientId;
     }
 
-    private void decryptPackageState() {
-        // TODO: cipher package state
+    private void decryptPackageState(BufferedReader reader) throws IOException {
+        String encryptedPackageState = reader.readLine();
+        String hmacPackageState = reader.readLine();
+        System.out.println("C(K_AB1, estado): " + encryptedPackageState);
+        System.out.println("HMAC(K_AB2, estado): " + hmacPackageState);
+
+        String decryptedPackageState = Symmetric.decipher(K_AB1, "AES", encryptedPackageState);
+        int packageStateCode = Integer.parseInt(decryptedPackageState);
+        PackageState packageState = PackageState.fromCode(packageStateCode);
+        String packageStateName = packageState.getDisplayName();
+        System.out.println("estado: " + packageStateName);
+
+        String hmacPackageStateGen = Symmetric.generateHMAC(K_AB2, decryptedPackageState);
+        if (hmacPackageState.equals(hmacPackageStateGen)) {
+            System.out.println("HMAC verificado");
+        } else {
+            System.out.println("HMAC no verificado");
+        }
     }
 
     private String generateHMAC(int id) {
@@ -213,23 +229,7 @@ public class ClientProtocol {
         String serverAnswer = reader.readLine();
         System.out.println("Server: " + serverAnswer);
         if (serverAnswer.equals("OK")) {
-            String encryptedPackageState = reader.readLine();
-            String hmacPackageState = reader.readLine();
-            System.out.println("C(K_AB1, estado): " + encryptedPackageState);
-            System.out.println("HMAC(K_AB2, estado): " + hmacPackageState);
-
-            String decryptedPackageState = Symmetric.decipher(K_AB1, "AES", encryptedPackageState);
-            int packageStateCode = Integer.parseInt(decryptedPackageState);
-            PackageState packageState = PackageState.fromCode(packageStateCode);
-            String packageStateName = packageState.getDisplayName();
-            System.out.println("estado: " + packageStateName);
-
-            String hmacPackageStateGen = Symmetric.generateHMAC(K_AB2, decryptedPackageState);
-            if (hmacPackageState.equals(hmacPackageStateGen)) {
-                System.out.println("HMAC verificado");
-            } else {
-                System.out.println("HMAC no verificado");
-            }
+            decryptPackageState(reader);
         }
     }
 }
