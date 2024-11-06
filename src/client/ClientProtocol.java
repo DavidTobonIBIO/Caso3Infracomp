@@ -3,6 +3,7 @@ package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -51,7 +52,7 @@ public class ClientProtocol {
         }
     }
 
-    private void startCommunication(PrintWriter writer) {
+    private void startCommunication(PrintWriter writer) throws UnsupportedEncodingException {
         writer.println("SECINIT");
         generateReto();
         cipherReto(writer);
@@ -83,42 +84,64 @@ public class ClientProtocol {
         generateReto();
         cipherReto(writer);
         // TODO: verificar igualdad de respuesta al reto
-        writer.println("OK");
-        byte[] firma = diffie(writer, reader);
-        boolean check = checkSignature(firma);
-        if (check) {
-            System.out.println("Firma verificada");
+        String rtaReto = reader.readLine();
+        System.out.println("rta" + rtaReto);
+        System.out.println("reto" + String.valueOf(reto));
+        //BigInteger rr = new BigInteger(rtaReto);
+        //rtaReto = String.valueOf(rr);
+        System.out.println(rtaReto);
+        if (String.valueOf(reto).equals(rtaReto)){
+            System.out.println("Reto correcto");
             writer.println("OK");
-            createY();
-            writer.println(String.valueOf(YClient));
-            getMasterKey(writer, reader);
-            for (int i = 1; i <= NUM_ITERATIONS; i++) {
-                System.out.println("Iteracion " + i);
-                client.setClientId(i);
-                client.setPackageId(i);
-                executePackgeRequest(writer);
-            }
-            writer.println("TERMINAR");
+        
+            byte[] firma = diffie(writer, reader);
+            boolean check = checkSignature(firma);
+            if (check) {
+                System.out.println("Firma verificada");
+                writer.println("OK");
+                createY();
+                writer.println(String.valueOf(YClient));
+                getMasterKey(writer, reader);
+                for (int i = 1; i <= NUM_ITERATIONS; i++) {
+                    System.out.println("Iteracion " + i);
+                    client.setClientId(i);
+                    client.setPackageId(i);
+                    executePackgeRequest(writer);
+                }
+                writer.println("TERMINAR");
 
-        } else {
-            System.out.println("Falla en la verificacion de la firma");
+            } else {
+                System.out.println("Falla en la verificacion de la firma");
+                writer.println("ERROR");
+            }
+        }else{
+            System.out.println("Error de reto");
             writer.println("ERROR");
         }
-
         endCommunication(writer);
     }
 
     private void runConcurrentCommunication(BufferedReader reader, PrintWriter writer) throws IOException,
             InvalidKeyException, NoSuchAlgorithmException, SignatureException, InvalidKeySpecException {
         startCommunication(writer);
-        byte[] firma = diffie(writer, reader);
-        boolean check = checkSignature(firma);
-        if (check) {
+        String rtaReto = reader.readLine();
+        BigInteger rr = new BigInteger(rtaReto);
+        rtaReto = String.valueOf(rr);
+        System.out.println(rtaReto);
+        if (reto.compareTo(rr) == 0){
+            System.out.println("Reto correcto");
             writer.println("OK");
-            createY();
-            writer.println(String.valueOf(YClient));
-            getMasterKey(writer, reader);
-        } else {
+            byte[] firma = diffie(writer, reader);
+            boolean check = checkSignature(firma);
+            if (check) {
+                writer.println("OK");
+                createY();
+                writer.println(String.valueOf(YClient));
+                getMasterKey(writer, reader);
+            } else {
+                writer.println("ERROR");
+            }
+        }else{
             writer.println("ERROR");
         }
         endCommunication(writer);
@@ -169,12 +192,14 @@ public class ClientProtocol {
 
     }
 
-    public void cipherReto(PrintWriter writer) {
+    public void cipherReto(PrintWriter writer) throws UnsupportedEncodingException {
         String retoString = String.valueOf(reto);
         byte[] encryptedReto = Asymmetric.cipher(publicKey, "RSA", retoString);
-        System.out.println("Cifrado: " + String.valueOf(encryptedReto));
-        String encryptedRetoString = Base64.getEncoder().encodeToString(encryptedReto);
+        //System.out.println("Cifrado: " + String.valueOf(encryptedReto));
+        String encryptedRetoString = Base64.getEncoder().withoutPadding().encodeToString(encryptedReto);
+        //String encryptedRetoString = new String(encryptedReto, "UTF-8");
         writer.println(encryptedRetoString);
+        System.out.println("cypher" + encryptedRetoString);
     }
 
     private String symmetricCipher(int id) {

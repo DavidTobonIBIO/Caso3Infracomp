@@ -112,11 +112,16 @@ public class ServerProtocol {
     }
 
     public static void getReto(BufferedReader reader, PrintWriter writer) throws IOException {
-        String reto = reader.readLine();;
+        String reto = reader.readLine();
+        System.out.println(reto);
         PrivateKey privateKey = getPrivateKey();
+        //BigInteger rr = new BigInteger(reto);
         byte[] rta = Asymmetric.decipher(privateKey, "RSA", reto);
-        String encodedK_AB1 = Base64.getEncoder().encodeToString(rta);
+        String encodedK_AB1 = Base64.getEncoder().withoutPadding().encodeToString(rta);
+        //String encodedK_AB = new String(rta, "UTF-8");
         System.out.println(encodedK_AB1);
+        //System.out.println("str" + encodedK_AB);
+        writer.println(encodedK_AB1);
     }
 
     public static String getPackageRequest(BufferedReader reader, PrintWriter writer) throws IOException {
