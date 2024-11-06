@@ -4,7 +4,7 @@ import client.Client;
 
 public class ClientApp {
 
-    private static final int NUM_ITERATIONS = 4;
+    private static final int NUM_ITERATIONS = 32;
 
     public static void main(String[] args) throws Exception {
 

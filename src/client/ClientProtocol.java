@@ -134,12 +134,6 @@ public class ClientProtocol {
                 createY();
                 writer.println(String.valueOf(YClient));
                 getMasterKey(reader, writer);
-                Random rand = new Random();
-                int i = rand.nextInt(31);
-                i = i +1;
-                System.out.println("Iteracion " + i);
-                client.setClientId(i);
-                client.setPackageId(i);
                 executePackgeRequest(reader, writer);
                 writer.println("TERMINAR");
             } else {
