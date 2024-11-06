@@ -128,7 +128,7 @@ public class Symmetric {
         return new SecretKeySpec(decodedKey, algorithm);
     }
 
-    public static byte[] cipher(SecretKey key, String algorithm, String msg) {
+    public static String cipher(SecretKey key, String algorithm, String msg) {
         try {
             if (algorithm.equals("AES")) {
                 Cipher cipher = Cipher.getInstance(PADDING);
@@ -137,9 +137,20 @@ public class Symmetric {
                 secureRandom.nextBytes(ivBytes);
                 IvParameterSpec iv = new IvParameterSpec(ivBytes);
                 cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-
+                
                 byte[] encryptedBytes = cipher.doFinal(msg.getBytes());
-                return encryptedBytes;
+                byte[] combined = new byte[ivBytes.length + encryptedBytes.length];
+                // Concatenar iv y mensaje cifrado
+                for (int i = 0; i < ivBytes.length; i++) {
+                    combined[i] = ivBytes[i];
+                }
+                for (int i = 0; i < encryptedBytes.length; i++) {
+                    combined[i + ivBytes.length] = encryptedBytes[i];
+                }
+
+                System.out.println("Mensaje cifrado: " + Base64.getEncoder().encodeToString(combined));
+
+                return Base64.getEncoder().encodeToString(combined);
             }
         } catch (Exception e) {
             System.out.println("Error al cifrar mensaje");
@@ -148,13 +159,47 @@ public class Symmetric {
         return null;
     }
 
-    public static byte[] generateHMAC(SecretKey key, String clientId) {
+    public static String decipher(SecretKey key, String algorithm, String msg) {
+        try {
+            if (algorithm.equals("AES")) {
+                Cipher cipher = Cipher.getInstance(PADDING);
+    
+                byte[] combined = Base64.getDecoder().decode(msg);
+    
+                // Extraer iv que son los primeros 16 bytes
+                byte[] ivBytes = new byte[16];
+                for (int i = 0; i < ivBytes.length; i++) {
+                    ivBytes[i] = combined[i];
+                }
+                IvParameterSpec iv = new IvParameterSpec(ivBytes);
+    
+                // Decifrar el mensaje que son los bytes restantes
+                byte[] encryptedBytes = new byte[combined.length - ivBytes.length];
+                for (int i = 0; i < encryptedBytes.length; i++) {
+                    encryptedBytes[i] = combined[i + ivBytes.length];
+                }
+                
+                cipher.init(Cipher.DECRYPT_MODE, key, iv);
+    
+                byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+                String decryptedString = new String(decryptedBytes, "UTF-8");
+                return decryptedString;
+            }
+        } catch (Exception e) {
+            System.out.println("Error al descifrar mensaje");
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+
+    public static String generateHMAC(SecretKey key, String clientId) {
         Mac mac;
         try {
             mac = Mac.getInstance("HmacSHA384");
             mac.init(key);
-            byte[] hmacBytes = mac.doFinal(clientId.getBytes());
-            return hmacBytes;
+            byte[] hmacBytes = mac.doFinal(Base64.getEncoder().encode(clientId.getBytes()));
+            return Base64.getEncoder().encodeToString(hmacBytes);
         } catch (InvalidKeyException | NoSuchAlgorithmException e) {
             System.out.println("Error al generar HMAC");
             e.printStackTrace();
