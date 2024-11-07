@@ -190,8 +190,9 @@ public class ServerProtocol {
 
         String hmacClientIdGen = Symmetric.generateHMAC(K_AB2, decryptedClientId);
         String hmacPackageIdGen = Symmetric.generateHMAC(K_AB2, decryptedPackageId);
-
-        if (hmacClientId.equals(hmacClientIdGen) && hmacPackageId.equals(hmacPackageIdGen)) {
+        boolean verification = hmacClientId.equals(hmacClientIdGen) && hmacPackageId.equals(hmacPackageIdGen);
+        writeQueryVerificationTime(System.nanoTime() - startTimeNs);
+        if (verification) {
             System.out.println("HMACs verificados");
             writer.println("OK");
             sendPackageState(decryptedClientId, decryptedPackageId, writer);
@@ -199,7 +200,6 @@ public class ServerProtocol {
             System.out.println("HMACs no verificados");
             writer.println("ERROR");
         }
-        writeQueryVerificationTime(System.nanoTime() - startTimeNs);
     }
 
     private static void sendPackageState(String clientId, String packageId, PrintWriter writer) {
