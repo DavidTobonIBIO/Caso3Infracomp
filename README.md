@@ -3,6 +3,7 @@
 - David Tobon 202123804
 
 ## Instrucciones de uso
+Se debe de correr el servidor antes que el cliente.
 1. Para correr el servidor utilice ServerApp.java
     * Si quiere que el servidor reciba solo un cliente (servidor Monothread) escriba `1` cuando el servidor pida el número de clientes concurrentes.
     * Si quiere que el servidor reciba varios clientes (servidor Multithread) escriba un número mayor que `1` cuando el servidor pida el número de clientes concurrentes.
