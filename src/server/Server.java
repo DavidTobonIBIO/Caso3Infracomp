@@ -47,7 +47,6 @@ public class Server {
                                 "Ingrese el numero de delegados concurrentes (1 para proceso iterativo, 4, 8, 32):");
                         nThreads = scanner.nextInt();
                         if (nThreads > 0) {
-                            ServerProtocol.setNumConcurrentClients(nThreads);
                             check = false;
                             launch();
                         } else {
@@ -112,8 +111,8 @@ public class Server {
 
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            while (ServerProtocol.execute(reader, writer))
+            ServerProtocol serverProtocol = new ServerProtocol(nThreads);
+            while (serverProtocol.execute(reader, writer))
                 ;
 
             writer.close();
@@ -143,7 +142,7 @@ public class Server {
                 Socket socket = serverSocket.accept();
                 System.out.println("Cliente " + id + " conectado: " + socket.getInetAddress().getHostAddress());
 
-                ServerThread serverThread = new ServerThread(socket, id);
+                ServerThread serverThread = new ServerThread(socket, id, new ServerProtocol(nThreads));
                 threadPool.execute(serverThread);
                 id++;
             }

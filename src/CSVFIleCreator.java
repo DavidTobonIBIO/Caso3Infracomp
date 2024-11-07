@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class CSVFIleCreator {
-    
+
     public static void main(String[] args) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("reto.csv"))) {
             writer.println("n_concurrent;time_ns");

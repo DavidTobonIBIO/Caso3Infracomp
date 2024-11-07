@@ -8,15 +8,18 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
+import java.io.InputStreamReader;
 
 public class ServerThread extends Thread {
 
     private Socket clientSocket = null;
     private int id;
+    private ServerProtocol serverProtocol;
 
-    public ServerThread(Socket clientSocket, int id) {
+    public ServerThread(Socket clientSocket, int id, ServerProtocol serverProtocol) {
         this.clientSocket = clientSocket;
         this.id = id;
+        this.serverProtocol = serverProtocol;
     }
 
     @Override
@@ -24,8 +27,8 @@ public class ServerThread extends Thread {
         System.out.println("Iniciando hilo " + id + " para cliente " + clientSocket.getInetAddress().getHostAddress());
         try {
             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(clientSocket.getInputStream()));
-            ServerProtocol.execute(reader, writer);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            serverProtocol.execute(reader, writer);
 
             writer.close();
             reader.close();

@@ -121,5 +121,4 @@ public class Client extends Thread {
         this.packageId = packageId;
     }
 
-    
 }

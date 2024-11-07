@@ -58,6 +58,7 @@ public class ClientProtocol {
     }
 
     private void endCommunication(PrintWriter writer) {
+        System.out.println("Cliente " + client.getClientId() + " desconectando...");
         writer.println("TERMINAR");
     }
 
@@ -80,11 +81,11 @@ public class ClientProtocol {
         cipherReto(writer);
         String rta = reader.readLine();
         byte[] rtaDecode = Base64.getDecoder().decode(rta);
-        BigInteger rtaBig = new BigInteger(rtaDecode); 
+        BigInteger rtaBig = new BigInteger(rtaDecode);
         System.out.println("reto: " + reto.toString());
         System.out.println("rta: " + rtaBig.toString());
-        
-        if (reto.compareTo(rtaBig) == 0){
+
+        if (reto.compareTo(rtaBig) == 0) {
             writer.println("OK");
             byte[] firma = diffie(writer, reader);
             boolean check = checkSignature(firma);
@@ -104,7 +105,7 @@ public class ClientProtocol {
                 System.out.println("Falla en la verificacion de la firma");
                 writer.println("ERROR");
             }
-        }else{
+        } else {
             System.out.println("Error de reto");
             writer.println("ERROR");
         }
@@ -119,8 +120,8 @@ public class ClientProtocol {
         String rta = reader.readLine();
         System.out.println("rta: " + rta);
         byte[] rtaDecode = Base64.getDecoder().decode(rta);
-        BigInteger rtaBig = new BigInteger(rtaDecode); 
-        if (reto.compareTo(rtaBig) == 0){
+        BigInteger rtaBig = new BigInteger(rtaDecode);
+        if (reto.compareTo(rtaBig) == 0) {
             writer.println("OK");
             byte[] firma = diffie(writer, reader);
             boolean check = checkSignature(firma);
@@ -134,7 +135,7 @@ public class ClientProtocol {
             } else {
                 writer.println("ERROR");
             }
-        }else{
+        } else {
             System.out.println("Error de reto");
             writer.println("ERROR");
         }

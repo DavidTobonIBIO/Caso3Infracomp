@@ -6,19 +6,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.util.Base64;
-import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -58,67 +58,27 @@ public class Symmetric {
         }
     }
 
-    public static String[] generatePG(String openSSLPath) throws IOException, InterruptedException {
-        Process process = Runtime.getRuntime().exec(openSSLPath + "\\openssl dhparam -text 1024");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line;
-        StringBuilder output = new StringBuilder();
-
-        while ((line = reader.readLine()) != null) {
-            output.append(line).append("\n");
-        }
-        reader.close();
-        process.waitFor();
-
-        String prime = "prime:\\s*([0-9a-fA-F:]+(\\s*[0-9a-fA-F:]+)*)";
-
-        Pattern p = Pattern.compile(prime);
-        Matcher matcherP = p.matcher(output);
-        String pString = "";
-        String gString = "";
-
-        if (matcherP.find()) {
-            pString = matcherP.group(1);
-            pString = pString.replaceAll("\n", "").replaceAll(" ", "");
-        } else {
-            System.out.println("P not found");
-        }
-
-        String generator = "generator:\\s*(\\d+)";
-        Pattern g = Pattern.compile(generator);
-        Matcher matcherG = g.matcher(output);
-
-        if (matcherG.find()) {
-            gString = matcherG.group(1);
-        } else {
-            System.out.println("G not found");
-        }
-
-        String[] GP = new String[] { pString, gString };
-        return GP;
-    }
-
-    public static BigInteger parser(String P) {
-        String[] partes = P.split(":");
-        String newS = "";
-
-        for (int i = 0; i < partes.length; i++) {
-            int parse = Integer.parseInt(partes[i], 16);
-            String bin = Integer.toBinaryString(parse);
-            newS = newS + bin;
-        }
-        BigInteger resp = new BigInteger(newS, 2);
-        return resp;
+    public static DHParameterSpec generatePG() throws Exception {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
+        keyPairGenerator.initialize(1024);
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+        DHPublicKey publicKey = (DHPublicKey) keyPair.getPublic();
+        DHParameterSpec dhParams = publicKey.getParams();
+        return dhParams;
     }
 
     public static BigInteger[] generateY(BigInteger P, int G) {
-        Random rand = new Random();
         BigInteger GB = BigInteger.valueOf(G);
-        BigInteger x1 = new BigInteger(1022, rand);
+        BigInteger x1 = new BigInteger(1022, new SecureRandom());
         BigInteger y = GB.modPow(x1, P);
-        BigInteger[] resp = new BigInteger[] { y, x1 };
-        return resp;
+        return new BigInteger[] { y, x1 };
+    }
 
+    public static BigInteger parser(String P) {
+        String newS = P.replace(":", "");
+
+        BigInteger resp = new BigInteger(newS, 16); // Specify base 16 for hexadecimal
+        return resp;
     }
 
     public static SecretKey loadKey(String algorithm) throws Exception {
@@ -137,7 +97,7 @@ public class Symmetric {
                 secureRandom.nextBytes(ivBytes);
                 IvParameterSpec iv = new IvParameterSpec(ivBytes);
                 cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-                
+
                 byte[] encryptedBytes = cipher.doFinal(msg.getBytes());
                 byte[] combined = new byte[ivBytes.length + encryptedBytes.length];
                 // Concatenar iv y mensaje cifrado
@@ -163,24 +123,24 @@ public class Symmetric {
         try {
             if (algorithm.equals("AES")) {
                 Cipher cipher = Cipher.getInstance(PADDING);
-    
+
                 byte[] combined = Base64.getDecoder().decode(msg);
-    
+
                 // Extraer iv que son los primeros 16 bytes
                 byte[] ivBytes = new byte[16];
                 for (int i = 0; i < ivBytes.length; i++) {
                     ivBytes[i] = combined[i];
                 }
                 IvParameterSpec iv = new IvParameterSpec(ivBytes);
-    
+
                 // Decifrar el mensaje que son los bytes restantes
                 byte[] encryptedBytes = new byte[combined.length - ivBytes.length];
                 for (int i = 0; i < encryptedBytes.length; i++) {
                     encryptedBytes[i] = combined[i + ivBytes.length];
                 }
-                
+
                 cipher.init(Cipher.DECRYPT_MODE, key, iv);
-    
+
                 byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
                 String decryptedString = new String(decryptedBytes, "UTF-8");
                 return decryptedString;
@@ -191,7 +151,6 @@ public class Symmetric {
         }
         return null;
     }
-    
 
     public static String generateHMAC(SecretKey key, String clientId) {
         Mac mac;
