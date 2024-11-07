@@ -75,7 +75,7 @@ public class ServerProtocol {
             if (numConcurrentClients == 1) {
                 // repetir para obtener replicas de tiempo y hacer promedio si se corre con
                 // cliente iterativo
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 32; i++) {
                     long startTimeNs = System.nanoTime();
                     DHParameterSpec dhParams = Symmetric.generatePG();
                     P = dhParams.getP();

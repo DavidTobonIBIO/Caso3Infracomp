@@ -29,8 +29,8 @@ public class ClientApp {
                     client.start();
                 }
                 for (int i = 0; i < clients.length; i++) {
-                    System.out.println("Esperando a que el cliente " + i + " termine...");
                     clients[i].join();
+                    System.out.println("Cliente " + (i+1) + " ha terminado.");
                 }
                 inMenu = false;
             } else if (option == 0) {
